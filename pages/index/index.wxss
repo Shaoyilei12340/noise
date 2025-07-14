@@ -1,0 +1,26 @@
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+.noise-level {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.increase-btn {
+  margin-bottom: 20px;
+}
+.nav-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.nav-buttons button {
+  width: 45%;
+}

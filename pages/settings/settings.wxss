@@ -1,0 +1,19 @@
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+.setting-item {
+  width: 100%;
+  margin-bottom: 20px;
+}
+.setting-item text {
+  display: block;
+  margin-bottom: 10px;
+}

@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="title">噪声累积量测量</view>
+  
+
+  
+  <view class="nav-buttons">
+    <button bindtap="noiseDetect" style="position: relative; left: 197rpx; top: 365rpx; width: 700rpx; display: block; box-sizing: border-box; height: 100rpx">开始噪声监测</button>
+    <button bindtap="goToResult" style="position: relative; left: -256rpx; top: 754rpx; width: 450rpx; display: block; box-sizing: border-box; height: 100rpx">查看结果</button>
+    <button bindtap="goToSettings" style="position: relative; left: -29rpx; top: 754rpx; height: 85rpx; display: block; box-sizing: border-box">设置</button>
+  </view>
+</view>
+
+

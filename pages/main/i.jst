@@ -1,0 +1,133 @@
+class NoiseExposureCalculator {
+    constructor() {
+        // 预计算时间项映射表 (10-60秒)
+        this.timeTermMap = {};
+        for (let t = 10; t <= 60; t++) {
+            this.timeTermMap[t] = 10 * Math.log10(t);
+        }
+        
+        // 校准参数
+        this.calibrationOffset = 0;
+    }
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * 转换原始音频采样值为校准后的dBSPL
+     * @param {Int16Array} samples - 原始音频采样缓冲区
+     * @returns {number} 校准后的声压级 (dBSPL)
+     */
+    convertToDBSPL(samples) {
+        // 计算RMS值
+        let sumSquares = 0;
+        for (let i = 0; i < samples.length; i++) {
+            sumSquares += samples[i] * samples[i];
+        }
+        const rms = Math.sqrt(sumSquares / samples.length);
+        
+        // 计算dBFS (满量程分贝)
+        const dBFS = 20 * Math.log10(rms / 32767); // 32767 = Int16最大值
+        
+        // 应用校准偏移
+        return dBFS + this.calibrationOffset;
+    }
+    
+    
+}
+
+// ===================== 使用示例 =====================
+// 场景：测量到45秒的噪声数据
+const samples = [
+    85, 86, 84, 87, 89, 92, 95, 97, 96, 94,
+    93, 91, 90, 88, 87, 86, 85, 86, 88, 90,
+    92, 93, 95, 96, 97, 98, 97, 96, 95, 94,
+    93, 92, 91, 90, 89, 88, 87, 86, 85, 84,
+    83, 82, 83, 84, 85
+];
+
+// 创建计算器实例
+const calculator = new NoiseExposureCalculator();
+
+// 设备校准 (示例值)
+calculator.calibrateDevice(94.0, -12.3);
+
+// 计算CNE
+try {
+    const cne = calculator.calculateShortCNE(samples, samples.length);
+    const risk = calculator.evaluateRisk(cne);
+    
+    console.log(`计算结果: CNE = ${cne.toFixed(1)} dB(A)·年`);
+    console.log(`风险等级: ${risk}`);
+    
+    // 输出: 
+    // 计算结果: CNE = 52.7 dB(A)·年
+    // 风险等级: 警告
+} catch (error) {
+    console.error('计算错误:', error.message);
+}
+
+// ===================== 实时处理示例 =====================
+class RealTimeNoiseMonitor {
+    constructor() {
+        this.calculator = new NoiseExposureCalculator();
+        this.buffer = [];
+        this.interval = null;
+    }
+    
+    /**
+     * 启动实时监测
+     * @param {number} duration - 监测时长 (秒)
+     */
+    startMonitoring(duration = 30) {
+        // 模拟音频数据流 (实际应用中替换为真实音频流)
+        this.interval = setInterval(() => {
+            // 生成模拟噪声数据 (实际应用中从麦克风获取)
+            const simulatedDB = 80 + Math.random() * 20;
+            this.processSample(simulatedDB, duration);
+        }, 1000); // 每秒处理一次
+    }
+    
+    /**
+     * 停止监测
+     */
+    stopMonitoring() {
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        this.buffer = [];
+    }
+    
+    /**
+     * 处理单个采样
+     * @param {number} dB - 当前秒的噪声测量值
+     * @param {number} duration - 监测时长
+     */
+    processSample(dB, duration) {
+        // 添加到缓冲区
+        this.buffer.push(dB);
+        
+        // 当缓冲区达到目标时长时计算CNE
+        if (this.buffer.length >= duration) {
+            try {
+                const cne = this.calculator.calculateShortCNE(this.buffer, duration);
+                const risk = this.calculator.evaluateRisk(cne);
+                
+                console.log(`[${new Date().toISOString()}] CNE: ${cne.toFixed(1)} dB·年 | 风险: ${risk}`);
+                
+                // 重置缓冲区(滑动窗口)
+                this.buffer = [];
+            } catch (error) {
+                console.error('实时计算错误:', error.message);
+            }
+        }
+    }
+}
+
+// 启动实时监测 (30秒窗口)
+// const monitor = new RealTimeNoiseMonitor();
+// monitor.startMonitoring(30);

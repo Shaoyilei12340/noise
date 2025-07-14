@@ -1,0 +1,8 @@
+
+<view class="container">
+  <canvas id="myCanvas" type="2d" style="border: 1px solid; width: 300px; height: 150px;" />
+  <view class="title">测量结果</view>
+  <view class="nav-buttons">
+    <button bindtap="draw" style="position: relative; left: -199rpx; top: 156rpx">查看</button> 
+  </view>
+</view>

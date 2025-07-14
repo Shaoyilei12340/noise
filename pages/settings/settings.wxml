@@ -1,0 +1,12 @@
+<view class="container">
+  <view class="title">设置</view>
+  <view class="setting-item">
+    <text>预期噪声暴露时间：</text>
+    <slider min="0" max="28800" value="{{expectedExposure}}" bindchange="updateExpectedExposure" show-value/>
+  </view>
+  <view class="setting-item">
+    <text>预期噪声暴露累积能量阈值：</text>
+    <slider min="0" max="100" value="{{noiseAlarmLevel}}" bindchange="updateNoiseLevel" show-value/>
+  </view>
+  <button bindtap="saveSettings">保存设置</button>
+</view>
