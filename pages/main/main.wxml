@@ -12,9 +12,10 @@
   <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
     当前实时估算听损风险水平：{{threat}}
   </view>
-  <canvas id="myCanvas" type="2d" style="border: 1px solid; width: 623rpx; height: 602rpx; position: relative; left: 0rpx; top: 36rpx; display: block; box-sizing: border-box" />
+  <canvas id="myCanvas" type="2d" style="border: 1px solid; width: 623rpx; height: 602rpx; position: relative; left: 1rpx; top: 106rpx; display: block; box-sizing: border-box" />
+  
   <view class="nav-buttons">
-    <button bindtap="stopNoiseMonitoring" style="position: relative; left: 0rpx; top: 220rpx; width: 308rpx; display: block; box-sizing: border-box">停止噪声监测</button>
+    <button bindtap="stopNoiseMonitoring" style="position: relative; left: 0rpx; top: 188rpx; width: 308rpx; display: block; box-sizing: border-box">停止噪声监测</button>
     
     
   </view>

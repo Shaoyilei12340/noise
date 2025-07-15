@@ -1,7 +1,7 @@
 const recorderManager = wx.getRecorderManager();
 const audioCtx = wx.createWebAudioContext();
 
-let canvas, ctx, dpr;
+let canvas,bcanvas, ctx, bctx, dpr;
 
 /** 
   * @param {number} offset
@@ -15,9 +15,9 @@ const dBArray = new Array();
 dBArray[0]=0;
 let cne = 0;
 let isAlarming = false;
+let time = 0;
 var threat, buffer;
 const expectedExposure = wx.getStorageSync('expectedExposure');
-console.log(expectedExposure);
 const noiseAlarmLevel = wx.getStorageSync('noiseAlarmLevel');
 const timeTerm = getTimeTerm(expectedExposure);
 
@@ -27,11 +27,6 @@ function getTimeTerm(time){
 }
 
 /*
-const timeMap = new Array();
-for (let t = 10; t <= 600; t++) {
-    timeMap[t] = 10 * Math.log10(t);
-}
-const index = require('../index/index.js');
 const availableAudioSources = wx.getAvailableAudioSources();
 */
 
@@ -80,10 +75,8 @@ function calculateShortCNE(dBArray, expectedExposure) {
   
   // 3. 估算峰度因子 (简化波动性评估)
   const kFactor = estimateKFactor(dBArray);
-  
-  // 4. 获取时间项 
-  
-  // 5. 计算CNE 
+
+  // 4. 计算CNE 
   cne = leq + timeTerm + (kFactor * 3) - 44.6;
 }
 
@@ -142,23 +135,82 @@ function evaluateRisk(cne) {
 function recordArray(currentTime, dBSPL){
   dBArray[currentTime] = dBSPL;
 }
+const globalSize = 300;
+const scaleX = 3;
+const scaleY = 4;
 
-function draw (time){  
+function canvasInit(){
+
+  // 绘制网格
+  ctx.strokeStyle = 'rgba(100, 150, 180, 0.2)';
+  ctx.lineWidth = 0.5;
+  
+  // 水平网格线
+  for (let y = 0; y <= globalSize; y += scaleY*10) {
       ctx.beginPath();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgb(0, 0, 0)';
-      ctx.moveTo((time-1)*3,-(dBArray[time-1])*2);
-      /*
-      if((time-1)*3>=200*dpr){
-        ctx.translate(-(time-1)*3, 0);
-      }
-      */
-      ctx.lineTo(time*3, -dBArray[time]*2);
-      //ctx.closePath();
-      ctx.stroke()
-      // 注册下一帧渲染
-      canvas.requestAnimationFrame(draw)
+      ctx.moveTo(0, -y);
+      ctx.lineTo(globalSize, -y);
+      ctx.stroke();
+  }
+  
+  // 垂直网格线
+  for (let x = 0; x <= globalSize; x += scaleX*10) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, -globalSize);
+      ctx.stroke();
+  }
+  
+  // 绘制坐标轴
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -globalSize);
+  ctx.lineTo(globalSize, -globalSize);
+  ctx.stroke();
+  
+  // 添加刻度标签
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '8px Arial';
+  ctx.textAlign = 'center';
+  for (let db = 100; db >= 0; db -= 10) {
+      const y = db*scaleY ;
+      ctx.fillText(`${db}dB`, globalSize, -y);
+  }
 }
+
+
+function draw (time){ 
+  var t = time;
+  
+  ctx.beginPath();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgb(0, 0, 0)';
+  var dx = Math.min(t*scaleX, globalSize);
+  ctx.moveTo(dx-scaleX,-(dBArray[t-1])*scaleY);
+  /* 没做好
+  if(t*scaleX>=globalSize){
+    console.log( "到顶了")
+    shiftCanvasLeft();
+  }
+  */
+  ctx.lineTo(dx, -dBArray[t]*scaleY);
+  ctx.stroke()
+  // 注册下一帧渲染
+  //canvas.requestAnimationFrame(draw)
+}
+function shiftCanvasLeft() {
+  
+  ctx.drawImage(
+  canvas,
+  50, -globalSize, (globalSize-50)*dpr, globalSize*dpr,
+  0, -globalSize, (globalSize-50)*dpr, globalSize*dpr
+);
+
+  ctx.clearRect(globalSize-50, -globalSize, 50, globalSize);
+  ctx.stroke();
+}
+
 
 Page({
   data:{
@@ -182,26 +234,23 @@ Page({
     query.select('#myCanvas')
       .fields({ node: true, size: true })
       .exec((res) => {
-        canvas = res[0].node
-        ctx = canvas.getContext('2d')
-        dpr = wx.getWindowInfo().pixelRatio
-        canvas.width = res[0].width * dpr
-        canvas.height = res[0].height * dpr
-        ctx.scale(dpr, dpr)
-        ctx.fillRect(0, 0, 200, 200)
-        let bufferLength = Uint8Array.length;
-        ctx.fillStyle = 'rgb(254, 254, 254)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        canvas = res[0].node;
+        ctx = canvas.getContext('2d');
+        dpr = wx.getWindowInfo().pixelRatio;
+        canvas.width = res[0].width * dpr;
+        canvas.height = res[0].height * dpr;     
+        ctx.scale(dpr, dpr);
+        //ctx.fillRect(0, 0, globalSize, globalSize);
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        ctx.fillRect(0, 0, globalSize, globalSize);
 
         ctx.lineWidth = 2;
         ctx.strokeStyle = 'rgb(0, 0, 0)';
-        ctx.translate(0,200);
-        const startTime = Date.now();
-        let startPoint = {x:0, y:0};
-        startPoint = {x:0, y:0};
-        
-    });
+        ctx.translate(0,globalSize);
 
+        canvasInit();
+      })
+      
   },
 
   onShow(){
@@ -224,7 +273,6 @@ Page({
   
     recorderManager.start(this.recordParams);
     console.log('ok');
-    var time = 0;
     
     recorderManager.onFrameRecorded(res => { 
       console.log('ok');
@@ -238,24 +286,21 @@ Page({
 
       setTimeout(function () {
         time++;
+        console.log(time)
         recordArray(time, dbspl);
-        draw(time, dBArray);
+        draw(time);
+      }, 1000)
+        
         try{
           calculateShortCNE(dBArray, time);
         }catch(Error){
           console.log(Error);
-        }
-        
+        }  
         console.log(cne);
-
         threat = evaluateRisk(cne);
         console.log(threat);
-      }, 1000)
       
       
-      
-      
-
       this.setData({
         dbfs: dbfs,
         dbspl: dbspl,
