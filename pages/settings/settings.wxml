@@ -1,3 +1,4 @@
+<!--
 <view class="container">
   <view class="title">设置</view>
   <view class="setting-item">
@@ -10,3 +11,88 @@
   </view>
   <button bindtap="saveSettings">保存设置</button>
 </view>
+-->
+
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="nav">
+    <text class="nav__title">个人设置</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 暴露目标 -->
+    <view class="group">
+      <view class="group__title">暴露目标</view>
+      <view class="cell">
+        <text class="cell__label">预期暴露时长</text>
+        <view class="cell__right">
+          <view
+           class="stepper__btn {{duration <= 0 ? 'stepper__btn--disabled' : ''}}"
+           bindtap="changeDuration"
+           data-delta="-0.5"
+           wx:if="{{duration > 0}}"
+          >−</view>
+
+          <view class="stepper__btn stepper__btn--disabled"
+            wx:else
+          >−</view>
+          
+          <text class="stepper__value">{{duration}} h</text>
+          <view class="stepper__btn" data-delta="0.5" bindtap="changeDuration" >+</view>
+        </view>
+      </view>
+
+      <view class="cell">
+        <text class="cell__label">累计能量阈值</text>
+        <slider class="slider" min="30" max="150" step="5" value="{{energy}}" bindchange="changeEnergy" activeColor="#4facfe"/>
+        <text class="slider__value">{{energy}}</text>
+      </view>
+
+      <view class="cell">
+        <text class="cell__label">能量单位</text>
+        <picker value="{{unitIndex}}" range="{{units}}" range-key="name" bindchange="changeUnit">
+          <view class="picker">{{units[unitIndex].name}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 提醒与权限 -->
+    <view class="group">
+      <view class="group__title">提醒与权限</view>
+      <view class="cell">
+        <text class="cell__label">超标提醒</text>
+        <switch checked="{{alarm}}" bindchange="toggleAlarm" color="#4facfe"/>
+      </view>
+      <view class="btn btn--plain" bindtap="requestRecord">麦克风权限管理</view>
+    </view>
+    <!-- 麦克风参数 -->
+    <view class="group">
+      <view class="group__title">麦克风参数</view>
+      
+      <view class="cell">
+        <text class="cell__label">偏移量</text>
+        <slider class="slider" min="0" max="150" step="1" value="{{offset}}" bindchange="changeOffset" activeColor="#4facfe"/>
+        <text class="slider__value">{{offset}}</text>
+      </view>
+      <view class="group__subtitle">（慎重调整，直接影响测量结果）</view>
+    </view>
+
+    <!-- 外观设置 -->
+    <view class="group">
+      <view class="group__title">外观与缓存</view>
+      <view class="cell">
+        <text class="cell__label">深色模式</text>
+        <switch checked="{{darkMode}}" bindchange="toggleDark" color="#4facfe"/>
+      </view>
+      <view class="btn btn--plain" bindtap="clearCache">清除本地缓存</view>
+    </view>
+
+
+    <!-- 底部操作 -->
+    <view class="footer">
+      <button class="btn btn--primary" bindtap="save">保存</button>
+      <button class="btn btn--ghost" bindtap="reset">恢复默认</button>
+    </view>
+  </scroll-view>
+</view>
+

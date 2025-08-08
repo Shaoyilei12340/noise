@@ -1,24 +1,34 @@
-<view class="container">
-  <view class="title">噪声累积量测量</view>
-  <view class="noise-level">
-    当前实时分贝：{{dbfs}} (dBFS)
+<view class="page">
+  <view class="head">
+    <text class="title">噪声累积能量测量</text>
   </view>
-  <view class="noise-level">
-    当前实时分贝：{{dbspl}} (dBSPL)
+  <view class="section--advanced">
+    <view class="noise-level">
+      当前实时分贝：{{dbfs}} (dB FS)
+    </view>
+    <view class="noise-level">
+      当前实时分贝：{{dbspl}} (dB SPL)
+    </view>
+    <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
+      实时估算噪声累积能量：{{cne}} (dB (A))
+    </view>
+    <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
+      当前实时估算听损风险水平：{{threat}}
+    </view>
   </view>
-  <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
-    实时估算噪声累积能量：{{cne}}
-  </view>
-  <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
-    当前实时估算听损风险水平：{{threat}}
-  </view>
-  <canvas id="myCanvas" type="2d" style="border: 1px solid; width: 623rpx; height: 602rpx; position: relative; left: 1rpx; top: 106rpx; display: block; box-sizing: border-box" />
   
-  <view class="nav-buttons">
-    <button bindtap="stopNoiseMonitoring" style="position: relative; left: 0rpx; top: 188rpx; width: 308rpx; display: block; box-sizing: border-box">停止噪声监测</button>
+  <div class="canvas-container">
+    <canvas id="canvas-back" type="2d" style="width: 623rpx; height: 602rpx;" />
+    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx;" />
+  </div>
+  
     
+  <view class="footer">
     
-  </view>
+    <button class="btn btn--primary" bindtap="stopNoiseMonitoring" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">停止噪声监测</button>
+  </view>  
+    
+  
 </view>
 
 

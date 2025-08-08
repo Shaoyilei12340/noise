@@ -3,12 +3,34 @@
     "pages/index/index",
     "pages/main/main",
     "pages/result/result",
-    "pages/settings/settings"
+    "pages/settings/settings",
+    "pages/my/my",
+    "pages/knowledge/knowledge",
+    "pages/about/about",
+    "pages/calibrate/calibrate"
   ],
+  "tabBar": {
+    "selectedColor": "#b4282d",
+    "position": "bottom",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "images/my.png",
+        "selectedIconPath": "images/my.png"
+      }
+    ]
+  },
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTitleText": "噪声累积量测量",
+    "navigationBarTitleText": "首页",
     "navigationBarTextStyle": "black"
   },
   "renderer": "webview",

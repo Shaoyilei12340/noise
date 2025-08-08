@@ -29,11 +29,36 @@ Page({
     });
   },
 
+  goToCalibrate: function() {
+    wx.showModal({
+      title: '提示',
+      content: '自助校准将在后续版本开放',
+      showCancel: false,       // 只有一个“确定”按钮
+      confirmText: '好的',
+      confirmColor: '#4facfe'
+    });
+    /* 开发中
+    wx.navigateTo({
+      url: '/pages/calibrate/calibrate'
+    });
+    */
+  },
+
+  goToKnowledge: function() {
+    wx.navigateTo({
+      url: '/pages/knowledge/knowledge'
+    });
+  },
+  goToAbout: function() {
+    wx.navigateTo({
+      url: '/pages/about/about'
+    });
+  },
   // 跳转到设置页
-  goToSettings: function() {
+  /*goToSettings: function() {
     wx.navigateTo({
       url: '/pages/settings/settings'
     });
-  },
+  },*/
 
 })

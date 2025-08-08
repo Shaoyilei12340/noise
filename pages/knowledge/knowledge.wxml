@@ -1,0 +1,25 @@
+<!--pages/knowledge/knowledge.wxml-->
+<view class="page">
+  <view class="head">
+    <text class="title">噪声危害科普</text>
+    <text class="sub">了解噪声，保护自己</text>
+  </view>
+
+  <view class="section">
+    <image class="pic" src="/images/what.png" mode="aspectFill" />
+    <text class="h2">什么是噪声？</text>
+    <text class="p">凡是令人烦躁、不适或妨碍正常生活的声音，都可称为噪声。法律评价指标为 dB(A)。</text>
+  </view>
+
+  <view class="section">
+    <image class="pic" src="/images/harm.png" mode="aspectFill" />
+    <text class="h2">对健康的伤害\n</text>
+    <text class="p">• 听力：长期 ≥85 dB(A) → 永久听力下降\n• 心血管：夜间 ≥55 dB(A) → 高血压风险上升\n• 神经系统 & 情绪：记忆力下降，精力难以集中，易怒暴躁</text>
+  </view>
+
+  <view class="section">
+    <image class="pic" src="/images/protect.png" mode="aspectFill" />
+    <text class="h2">如何防护？</text>
+    <text class="p">1. 远离或降低声源\n2. 佩戴降噪耳塞/耳罩\n3. 合理作息，减少暴露时间\n4. 定期检测听力</text>
+  </view>
+</view>
