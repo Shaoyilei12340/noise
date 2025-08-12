@@ -19,13 +19,13 @@
   
   <div class="canvas-container">
     <canvas id="canvas-back" type="2d" style="width: 623rpx; height: 602rpx;" />
-    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx;" />
+    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx; position: absolute; left: 24rpx; top: 0rpx" />
   </div>
   
     
   <view class="footer">
-    
-    <button class="btn btn--primary" bindtap="stopNoiseMonitoring" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">停止噪声监测</button>
+    <button class="btn btn--primary" bindtap="_saveResult" style="position: relative; left: -10rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">保存记录</button>
+    <button class="btn btn--primary" bindtap="stopNoiseMonitoring" style="position: relative; left: 8rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">停止噪声监测</button>
   </view>  
     
   

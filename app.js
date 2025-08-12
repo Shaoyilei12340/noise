@@ -1,7 +1,8 @@
 // app.js
 App({
   globalData:{
-    version: "Alpha 0.2.0.20250808.1",
+    version: "Alpha 0.2.1.20250812.1",
+    vstamp:"a.0.2.1.20250812.1",
     init: false,
   },
 
@@ -25,10 +26,12 @@ App({
     wx.showLoading({
       title: '初始化',
     });
+    var initDataArray = new Array();
     this.ioLog('expectedExposure', 8, 'set')
     this.ioLog('noiseAlarmLevel', 110, 'set');
     this.ioLog('alarm', true, 'set');
     this.ioLog('offset', 77, 'set');
+    //this.ioLog('savedResult', initDataArray, 'set');
     this.ioLog('init', true, 'set');
     setTimeout(function () {
       wx.hideLoading()
@@ -57,11 +60,6 @@ App({
               console.log('reject record');
             }
           })
-        wx.showToast({
-          title: '您已授权录音',
-          icon: 'success',
-          duration: 1000
-        });
         }
       }
     })

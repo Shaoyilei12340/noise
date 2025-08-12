@@ -1,2 +1,29 @@
-<!--pages/calibrate/calibrate.wxml-->
-<text>pages/calibrate/calibrate.wxml</text>
+<view class="page">
+  <view class="head">
+    <text class="title">麦克风校准</text>
+  </view>
+  <view class="section--advanced">
+    <text> 
+      以经验为基准的简易麦克风偏移量校准：<br/>
+      本地麦克风设备校准偏移量<br/>
+      -67dbFS ~ 10dbSPL 非常安静的房间<br/>
+      -35dbFS ~ 60dbSPL 1m 正常谈话<br/>
+      10 - (-67) = 77<br/>
+    </text>
+    <view class="noise-level">
+      当前实时分贝：{{dbfs}} (dB FS)
+    </view>
+    <view class="noise-level">
+      当前实时分贝：{{dbspl}} (dB SPL)
+    </view>
+  </view>
+  <div class="canvas-container">
+    <canvas id="canvas-back" type="2d" style="width: 623rpx; height: 602rpx;" />
+    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx;" />
+  </div>
+  <view class="footer">
+    <button class="btn btn--primary" bindtap="stopNoiseMonitoring" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">退出校准</button>
+  </view>  
+</view>
+
+

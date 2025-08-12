@@ -1,8 +1,19 @@
+<template name="listedResult">
+  <view class="card" hover-class="card--pressed">
+    <view class="card__body">
+      <text class="card__title">{{date}}</text>
+      <text class="card__desc">记录时长：{{duration}} (s)</text>
+      <text class="card__desc">预计暴露时间：{{exposure}} (s)</text>
+      <text class="card__desc">CNE值：{{cne}} (dB(A))</text>
+      <text class="card__desc">预估危险水平：{{threat}}</text>
+    </view>
+  </view>
+</template>
 
-<view class="container">
-  <canvas id="myCanvas" type="2d" style="border: 1px solid; width: 300px; height: 150px;" />
-  <view class="title">测量结果</view>
-  <view class="nav-buttons">
-    <button bindtap="draw" style="position: relative; left: -199rpx; top: 156rpx">查看</button> 
+<view class="page">
+  <view class="grid">
+    <block wx:for="{{savedResult}}">
+      <template is="listedResult" data="{{...item}}"/>
+    </block>
   </view>
 </view>

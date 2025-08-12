@@ -1,8 +1,9 @@
+const app = getApp();
 const recorderManager = wx.getRecorderManager();
-const audioCtx = wx.createWebAudioContext();
-
-let canvasf, canvasb, ctxf, ctxb, dpr;
-
+var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
+var startDate, dBArray, time, cne, threat, buffer, expectedExposure, noiseAlarmLevel;
+var allowAlarm = true, isAlarming = false;
+console.log("offset: ", offset);
 /** 
   * @param {number} offset
   * 本地麦克风设备校准偏移量
@@ -11,15 +12,6 @@ let canvasf, canvasb, ctxf, ctxb, dpr;
   *10 - (-67) = 77
 */
 const offset = wx.getStorageSync('offset');
-console.log("offset: ", offset);
-let dBArray = new Array();
-dBArray[0] = 0;
-let allowAlarm = true;
-let isAlarming = false;
-let time = 0;
-var cne = 0;
-var threat, buffer;
-let expectedExposure, noiseAlarmLevel;
 
 function getTimeTerm(time=28800){
   return 10 * Math.log10(time);
@@ -149,17 +141,15 @@ function mesh(ctx=ctxb, mtX, ltX){
   ctx.lineWidth = 0;
   */
   // 绘制网格
-  ctx.save();
   ctx.strokeStyle = 'rgba(100, 150, 180, 1)';
   ctx.lineWidth = 0.2;
   // 水平网格线
-  for (let y = 0; y < globalSize; y += scaleY*10) {
-      ctx.beginPath();
-      ctx.moveTo(mtX, -y);
-      ctx.lineTo(ltX, -y);
-      ctx.stroke();
+  for (let y = 0; y < scaleY*10*14; y += scaleY*10) {
+    ctx.beginPath();
+    ctx.moveTo(mtX, -y);
+    ctx.lineTo(ltX, -y);
+    ctx.stroke();
   }
-  ctx.restore();
   /*
   // 垂直网格线
   for (let x = 0; x <= globalSize; x += scaleX*10) {
@@ -185,7 +175,7 @@ function mark(ctx=ctxb){
   ctx.fillStyle = '#90a4ae';
   ctx.font = '8px Arial';
   ctx.textAlign = 'left';
-  for (let db = 140; db >= 0; db -= 10) {
+  for (let db = 130; db >= 0; db -= 10) {
       const y = db*scaleY ;
       ctx.fillText(`${db} dB`, globalSize, -y);
   }
@@ -194,20 +184,20 @@ function mark(ctx=ctxb){
 function draw(ctx=ctxf, time){ 
   // translated
   var t = time;
-  ctx.beginPath();
   ctx.lineWidth = 1;
   ctx.strokeStyle = 'rgb(0, 0, 0)';
   var dx = Math.min(t*scaleX, globalSize);
+  ctx.save();
   if(t*scaleX>globalSize){
     shiftCanvasLeft(canvasf, ctxf);
   }
+  ctx.restore();
+  ctx.beginPath();
   ctx.moveTo(dx-scaleX,-(dBArray[t-1])*scaleY);
   ctx.lineTo(dx, -dBArray[t]*scaleY);
   ctx.stroke()
 }
 function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {  
-  ctx.save();
-  // 平移整个画布内容
   //ctxb.globalCompositeOperation = 'destination-atop';
   ctx.globalCompositeOperation = 'copy';
   ctx.translate(0, -globalSize);
@@ -220,27 +210,27 @@ function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {
   ctx.translate(0, globalSize);
   mesh(ctxb, globalSize-scaleX, globalSize);
   //mark(ctxb);
-  ctx.restore();
-  ctx.stroke();
   ctx.globalCompositeOperation = 'source-over';
+  
 }
 function initMonitor(){
   try{
+    audioCtx = wx.createWebAudioContext();
     expectedExposure = (wx.getStorageSync('expectedExposure'))*3600;
     noiseAlarmLevel = wx.getStorageSync('noiseAlarmLevel');
     allowAlarm = wx.getStorageSync('alarm');
+    isAlarming = false;
     console.log("en：", expectedExposure, noiseAlarmLevel);
     dBArray = new Array();
     dBArray[0]=0;
     cne = 0;
-    isAlarming = false;
+    
     time = 0;
   }catch(e){
     console.log(e);
   }
   
 }
-
 
 Page({
   data:{
@@ -295,6 +285,68 @@ Page({
     initMonitor();
     this.noiseDetect();
   },
+  onHide(){
+    this.stopNoiseMonitoring();
+  },
+
+  onUnload(){
+    this.stopNoiseMonitoring();
+  },
+
+  archive(){
+    let options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    };
+    let currentDate = Date.now();
+    let duration = (currentDate - startDate)/1000; // ms -> s
+    currentDate = new Date(currentDate);
+    //let fd = new Intl.DateTimeFormat("zh-CN", options).format(currentDate) // 不支持Intl
+    currentDate = currentDate.toLocaleString("zh-CN");
+    const data = {
+      date:currentDate,
+      duration:duration.toFixed(3),
+      exposure:expectedExposure,
+      cne:this.data.cne,
+      threat:this.data.threat,
+      extra:null,
+      vstamp:app.globalData.vstamp,
+    };
+    return data;
+  },
+
+  saveResult(){
+    console.group('save')
+    let savedResult = wx.getStorageSync('savedResult');
+    if (!Array.isArray(savedResult)) {
+      savedResult = [];
+    }
+    console.log("svd: ", savedResult)
+    let _save = this.archive();
+    console.log("archived: ", _save)
+    savedResult.unshift(_save);
+    console.log("formed: ", savedResult);
+    wx.setStorageSync('savedResult', savedResult);
+    console.groupEnd();
+    wx.showToast({
+      title: '保存结果',
+      icon: 'success',
+      duration: 1000
+    });
+  },
+
+  _saveResult(){
+    try{
+      this.saveResult();
+    }catch(e){
+      console.log(e);
+    };
+  },
 
   stopNoiseMonitoring: function() {
     recorderManager.stop();
@@ -312,7 +364,8 @@ Page({
     
     recorderManager.start(this.recordParams);
     console.log('recorderManager ok');
-    
+    startDate = Date.now();
+    console.log("record start@ ", startDate);
     recorderManager.onFrameRecorded(res => { 
       console.group("recordAnalysis");
       const resbuffer = res.frameBuffer;  // 获取PCM数据
@@ -322,6 +375,7 @@ Page({
       const energy = calculateRMS(buffer);
       const dbfs = calculatedb(energy);
       const dbspl = dbfs + offset;
+      
 
       setTimeout(function () {
         time++;

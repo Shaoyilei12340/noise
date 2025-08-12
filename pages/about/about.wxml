@@ -8,7 +8,7 @@
   <view class="section">
     <image class="pic" src="/images/what.png" mode="aspectFill" />
     <text class="h2">什么是噪声监测？</text>
-    <text class="p">凡是令人烦躁、不适或妨碍正常生活的声音，都可称为噪声。法律评价指标为 dB(A)。</text>
+    <text class="p">基于GB/T 14366-2017标准制作的移动设备简易噪声累积能量监测小程序</text>
   </view>
 
 
