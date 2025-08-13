@@ -22,16 +22,6 @@ let timeTerm = getTimeTerm(expectedExposure);
 const availableAudioSources = wx.getAvailableAudioSources();
 */
 
-/**
-   * 执行设备校准
-   * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
-   * @param {number} measuredDBFS - 测量到的dBFS值
- */
-
-function calibrate(knownDBSPL, measuredDBFS) {
-  calibrationOffset = knownDBSPL - measuredDBFS;
-}
-
 function calculateRMS(pcmData) {
   let sumSquares = 0;
   for (let i = 0; i < pcmData.length; i++) {
@@ -45,8 +35,6 @@ function calculateRMS(pcmData) {
 function calculatedb(rms, reference = 32767){
   return 20 * Math.log10(Math.max(rms, 1e-12) / reference);
 }
-
-
 
 /**   calculateShortCNE(dBArray, expectedExposure)
      * 计算短时噪声累积暴露能量 (CNE)
@@ -294,6 +282,7 @@ Page({
   },
 
   archive(){
+    /*
     let options = {
       year: "numeric",
       month: "numeric",
@@ -303,11 +292,15 @@ Page({
       second: "numeric",
       hour12: false,
     };
+    */ // 不支持Intl
     let currentDate = Date.now();
     let duration = (currentDate - startDate)/1000; // ms -> s
     currentDate = new Date(currentDate);
     //let fd = new Intl.DateTimeFormat("zh-CN", options).format(currentDate) // 不支持Intl
     currentDate = currentDate.toLocaleString("zh-CN");
+    let d = wx.getDeviceInfo();
+    let device = d.brand + ' ' + d.model;
+    let system = d.system;
     const data = {
       date:currentDate,
       duration:duration.toFixed(3),
@@ -315,6 +308,9 @@ Page({
       cne:this.data.cne,
       threat:this.data.threat,
       extra:null,
+      device:device,
+      system:system,
+      offset:offset,
       vstamp:app.globalData.vstamp,
     };
     return data;

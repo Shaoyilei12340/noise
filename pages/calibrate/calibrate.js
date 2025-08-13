@@ -1,8 +1,7 @@
 const recorderManager = wx.getRecorderManager();
-const audioCtx = wx.createWebAudioContext();
-
-let canvasf, canvasb, ctxf, ctxb, dpr;
-
+var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
+console.log("offset: ", offset);
+var dBArray, time, buffer;
 /** 
   * @param {number} offset
   * 本地麦克风设备校准偏移量
@@ -11,11 +10,6 @@ let canvasf, canvasb, ctxf, ctxb, dpr;
   *10 - (-67) = 77
 */
 const offset = wx.getStorageSync('offset');
-console.log("offset: ", offset);
-let dBArray = new Array();
-dBArray[0] = 0;
-let time = 0;
-var buffer;
 
 /**
    * 执行设备校准
@@ -57,17 +51,15 @@ function mesh(ctx=ctxb, mtX, ltX){
   ctx.lineWidth = 0;
   */
   // 绘制网格
-  ctx.save();
   ctx.strokeStyle = 'rgba(100, 150, 180, 1)';
   ctx.lineWidth = 0.2;
   // 水平网格线
-  for (let y = 0; y < globalSize; y += scaleY*10) {
-      ctx.beginPath();
-      ctx.moveTo(mtX, -y);
-      ctx.lineTo(ltX, -y);
-      ctx.stroke();
+  for (let y = 0; y < scaleY*10*14; y += scaleY*10) {
+    ctx.beginPath();
+    ctx.moveTo(mtX, -y);
+    ctx.lineTo(ltX, -y);
+    ctx.stroke();
   }
-  ctx.restore();
   /*
   // 垂直网格线
   for (let x = 0; x <= globalSize; x += scaleX*10) {
@@ -93,7 +85,7 @@ function mark(ctx=ctxb){
   ctx.fillStyle = '#90a4ae';
   ctx.font = '8px Arial';
   ctx.textAlign = 'left';
-  for (let db = 140; db >= 0; db -= 10) {
+  for (let db = 130; db >= 0; db -= 10) {
       const y = db*scaleY ;
       ctx.fillText(`${db} dB`, globalSize, -y);
   }
@@ -102,20 +94,20 @@ function mark(ctx=ctxb){
 function draw(ctx=ctxf, time){ 
   // translated
   var t = time;
-  ctx.beginPath();
   ctx.lineWidth = 1;
   ctx.strokeStyle = 'rgb(0, 0, 0)';
   var dx = Math.min(t*scaleX, globalSize);
+  ctx.save();
   if(t*scaleX>globalSize){
     shiftCanvasLeft(canvasf, ctxf);
   }
+  ctx.restore();
+  ctx.beginPath();
   ctx.moveTo(dx-scaleX,-(dBArray[t-1])*scaleY);
   ctx.lineTo(dx, -dBArray[t]*scaleY);
   ctx.stroke()
 }
 function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {  
-  ctx.save();
-  // 平移整个画布内容
   //ctxb.globalCompositeOperation = 'destination-atop';
   ctx.globalCompositeOperation = 'copy';
   ctx.translate(0, -globalSize);
@@ -128,14 +120,15 @@ function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {
   ctx.translate(0, globalSize);
   mesh(ctxb, globalSize-scaleX, globalSize);
   //mark(ctxb);
-  ctx.restore();
-  ctx.stroke();
   ctx.globalCompositeOperation = 'source-over';
+  
 }
 function initMonitor(){
   try{
+    audioCtx = wx.createWebAudioContext();
     dBArray = new Array();
     dBArray[0]=0;
+    cne = 0; 
     time = 0;
   }catch(e){
     console.log(e);
@@ -194,6 +187,13 @@ Page({
   onShow(){
     initMonitor();
     this.noiseDetect();
+  },
+  onHide(){
+    this.stopNoiseMonitoring();
+  },
+
+  onUnload(){
+    this.stopNoiseMonitoring();
   },
 
   stopNoiseMonitoring: function() {
