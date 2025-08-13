@@ -1,8 +1,8 @@
 // app.js
 App({
   globalData:{
-    version: "Alpha 0.2.1.20250812.1",
-    vstamp:"a.0.2.1.20250812.1",
+    version: "Alpha 0.2.1.20250813.2",
+    vstamp:"a.0.2.1.20250813.2",
     init: false,
   },
 
