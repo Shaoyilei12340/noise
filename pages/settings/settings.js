@@ -59,6 +59,19 @@ Page({
     let newVal = Math.max(0, this.data.duration + delta);
     this.setData({ duration: newVal.toFixed(1) });
   },*/
+  onShow:function(){
+    try{
+      this.setData({
+        duration: wx.getStorageSync('expectedExposure'),
+        energy: wx.getStorageSync('noiseAlarmLevel'),
+        alarm: wx.getStorageSync('alarm'),
+        offset: wx.getStorageSync('offset'),
+      });
+    }catch(Error){
+      console.log("local variable unavailable.");
+      this.reset();
+    }
+  },
 
   changeDuration(e) {
     let delta = parseFloat(e.currentTarget.dataset.delta || 0);

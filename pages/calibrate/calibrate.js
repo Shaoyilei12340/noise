@@ -1,25 +1,7 @@
+const app = getApp();
 const recorderManager = wx.getRecorderManager();
 var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
-console.log("offset: ", offset);
-var dBArray, time, buffer;
-/** 
-  * @param {number} offset
-  * 本地麦克风设备校准偏移量
-  *-67dbFS ~ 10dbSPL 非常安静的房间
-  *-35dbFS ~ 60dbSPL 1m 正常谈话
-  *10 - (-67) = 77
-*/
-const offset = wx.getStorageSync('offset');
-
-/**
-   * 执行设备校准
-   * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
-   * @param {number} measuredDBFS - 测量到的dBFS值
- */
-
-function calibrate(knownDBSPL, measuredDBFS) {
-  calibrationOffset = knownDBSPL - measuredDBFS;
-}
+var offset, dBArray, time, buffer, stopCalibration = false;
 
 function calculateRMS(pcmData) {
   let sumSquares = 0;
@@ -40,7 +22,7 @@ function recordArray(currentTime, dBSPL){
 }
 const globalSize = 300;
 const scaleX = 30;
-const scaleY = 2;
+const scaleY = 3;
 
 function mesh(ctx=ctxb, mtX, ltX){
   // translated
@@ -87,7 +69,7 @@ function mark(ctx=ctxb){
   ctx.textAlign = 'left';
   for (let db = 130; db >= 0; db -= 10) {
       const y = db*scaleY ;
-      ctx.fillText(`${db} dB`, globalSize, -y);
+      ctx.fillText(`${db}dB`, globalSize, -y);
   }
 }
 
@@ -125,51 +107,37 @@ function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {
 }
 function initMonitor(){
   try{
+    stopCalibration = false;
+    offset = wx.getStorageSync('offset');
     audioCtx = wx.createWebAudioContext();
     dBArray = new Array();
     dBArray[0]=0;
-    cne = 0; 
     time = 0;
   }catch(e){
     console.log(e);
   }
-  
 }
 
+function initCanvasFront(query){
+  query.select('#canvas-front')
+    .fields({ node: true, size: true })
+    .exec((res) => {
+      canvasf = res[0].node;
+      ctxf = canvasf.getContext('2d');
+      dpr = wx.getWindowInfo().pixelRatio;
+      canvasf.width = res[0].width * dpr;
+      canvasf.height = res[0].height * dpr; 
+      console.log("canvas px: ",canvasf.width, "x", canvasf.height);    
+      ctxf.scale(dpr, dpr);
+      ctxf.lineWidth = 0;
+      //ctxf.strokeStyle = 'rgb(0, 0, 0)';
+      ctxf.translate(0, globalSize);
+      console.log("canvas ok")
+    })
+}
 
-Page({
-  data:{
-    dbfs: 0,
-    dbspl: 0,
-  },
-  recordParams: {
-    duration: 600000,
-    sampleRate: 16000,    // 采样率（Hz）
-    numberOfChannels: 1,
-    encodeBitRate: 24000,
-    format:'PCM',
-    frameSize: 16,      // 每帧采样点数
-    audioSource:'auto',
-  },
-  
-  onReady() {
-    const query = wx.createSelectorQuery()
-    query.select('#canvas-front')
-      .fields({ node: true, size: true })
-      .exec((res) => {
-        canvasf = res[0].node;
-        ctxf = canvasf.getContext('2d');
-        dpr = wx.getWindowInfo().pixelRatio;
-        canvasf.width = res[0].width * dpr;
-        canvasf.height = res[0].height * dpr; 
-        console.log("canvas px: ",canvasf.width, "x", canvasf.height);    
-        ctxf.scale(dpr, dpr);
-        ctxf.lineWidth = 0;
-        //ctxf.strokeStyle = 'rgb(0, 0, 0)';
-        ctxf.translate(0, globalSize);
-        console.log("canvas ok")
-      })
-    query.select('#canvas-back')
+function initCanvasBack(query){
+  query.select('#canvas-back')
     .fields({ node: true, size: true })
     .exec((res) => {
       canvasb = res[0].node;
@@ -182,6 +150,34 @@ Page({
       mark(ctxb);
       //ctxb.globalCompositeOperation = 'destination-over';
     })
+}
+
+
+Page({
+  data:{
+    dbfs: 0,
+    dbspl: 0,
+    dbfsSlientRoom:0,
+    dbfs1mTalk:0,
+    offsetSlientRoom:0,
+    offset1mTalk:0,
+    presetCalibration:"无",
+    newOffset:0,
+  },
+  recordParams: {
+    duration: 600000,
+    sampleRate: 16000,    // 采样率（Hz）
+    numberOfChannels: 1,
+    encodeBitRate: 24000,
+    format:'PCM',
+    frameSize: 16,      // 每帧采样点数
+    audioSource:'auto',
+  },
+  
+  onReady() {
+    const query = wx.createSelectorQuery();
+    initCanvasFront(query);
+    initCanvasBack(query);
   },
 
   onShow(){
@@ -202,9 +198,76 @@ Page({
     wx.navigateBack();
   },
 
+  roughCalibrateSlientRoom() {   
+    /**
+       * 执行设备校准
+       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
+       * @param {number} measuredDBFS - 测量到的dBFS值
+     */
+    let measuredDBFS=this.data.dbfs, knownDBSPL = 33;
+    let roughCalibrationOffset = knownDBSPL - measuredDBFS;
+    this.setData({
+      dbfsSlientRoom:measuredDBFS,
+      offsetSlientRoom:roughCalibrationOffset,
+      presetCalibration:"一般安静房间",
+      newOffset:roughCalibrationOffset,
+    })
+    return roughCalibrationOffset;
+  },
+  
+  roughCalibrateTalk() {
+    /**
+       * 执行设备校准
+       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
+       * @param {number} measuredDBFS - 测量到的dBFS值
+     */
+    let measuredDBFS=this.data.dbfs, knownDBSPL = 63;
+    let roughCalibrationOffset = knownDBSPL - measuredDBFS;
+    this.setData({
+      dbfs1mTalk:measuredDBFS,
+      offset1mTalk:roughCalibrationOffset,
+      presetCalibration:"一米正常谈话",
+      newOffset:roughCalibrationOffset,
+    })
+    return roughCalibrationOffset;
+  },
+  
+  autoCalibrateTraffic(knownDBSPL, measuredDBFS) {
+    //
+  },
+
+  saveOffset(){
+    let calibration = this;
+    let offset = calibration.data.newOffset;
+    let str = `
+    您即将应用以下校准：
+    类型为${this.data.presetCalibration} ，偏移量为${offset}
+    `;
+    wx.showModal({
+      title: '应用校准',
+      content: str,
+      success (res) {
+        if (res.confirm) {
+          wx.setStorageSync('offset', offset);
+          offset = wx.getStorageSync('offset');
+          console.log(`set offset to ${offset} by user`);
+          stopCalibration = true;
+        } else if (res.cancel) {
+          console.log('calibration aborted by user');
+        }
+      },
+      complete(){
+        if(stopCalibration){
+          console.log('stop calibration');
+          calibration.stopNoiseMonitoring();
+        }
+      }
+    })
+  },
+
   noiseDetect: function () {
     wx.showLoading({
-      title: '启动监测',
+      title: '启动校准',
     });
     setTimeout(function () {
       wx.hideLoading()

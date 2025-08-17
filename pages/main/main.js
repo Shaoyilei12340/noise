@@ -1,17 +1,8 @@
 const app = getApp();
 const recorderManager = wx.getRecorderManager();
 var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
-var startDate, dBArray, time, cne, threat, buffer, expectedExposure, noiseAlarmLevel;
+var startDate, offset, dBArray, time, cne, threat, buffer, expectedExposure, noiseAlarmLevel;
 var allowAlarm = true, isAlarming = false;
-console.log("offset: ", offset);
-/** 
-  * @param {number} offset
-  * 本地麦克风设备校准偏移量
-  *-67dbFS ~ 10dbSPL 非常安静的房间
-  *-35dbFS ~ 60dbSPL 1m 正常谈话
-  *10 - (-67) = 77
-*/
-const offset = wx.getStorageSync('offset');
 
 function getTimeTerm(time=28800){
   return 10 * Math.log10(time);
@@ -165,7 +156,7 @@ function mark(ctx=ctxb){
   ctx.textAlign = 'left';
   for (let db = 130; db >= 0; db -= 10) {
       const y = db*scaleY ;
-      ctx.fillText(`${db} dB`, globalSize, -y);
+      ctx.fillText(`${db}dB`, globalSize, -y);
   }
 }
 
@@ -185,6 +176,7 @@ function draw(ctx=ctxf, time){
   ctx.lineTo(dx, -dBArray[t]*scaleY);
   ctx.stroke()
 }
+
 function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {  
   //ctxb.globalCompositeOperation = 'destination-atop';
   ctx.globalCompositeOperation = 'copy';
@@ -204,20 +196,53 @@ function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {
 function initMonitor(){
   try{
     audioCtx = wx.createWebAudioContext();
+    offset = wx.getStorageSync('offset');
     expectedExposure = (wx.getStorageSync('expectedExposure'))*3600;
     noiseAlarmLevel = wx.getStorageSync('noiseAlarmLevel');
     allowAlarm = wx.getStorageSync('alarm');
     isAlarming = false;
-    console.log("en：", expectedExposure, noiseAlarmLevel);
+    console.log(`[initMonitor] offset:${offset}, expectedExposure:${expectedExposure}, noiseAlarmLevel:${noiseAlarmLevel}, allowAlarm:${allowAlarm}`);
     dBArray = new Array();
     dBArray[0]=0;
     cne = 0;
-    
     time = 0;
   }catch(e){
     console.log(e);
-  }
-  
+  } 
+}
+
+function initCanvasFront(query){
+  query.select('#canvas-front')
+    .fields({ node: true, size: true })
+    .exec((res) => {
+      canvasf = res[0].node;
+      ctxf = canvasf.getContext('2d');
+      dpr = wx.getWindowInfo().pixelRatio;
+      canvasf.width = res[0].width * dpr;
+      canvasf.height = res[0].height * dpr; 
+      console.log("canvas px: ",canvasf.width, "x", canvasf.height);    
+      ctxf.scale(dpr, dpr);
+      ctxf.lineWidth = 0;
+      //ctxf.strokeStyle = 'rgb(0, 0, 0)';
+      ctxf.translate(0, globalSize);
+      console.log("canvas ok")
+    })
+}
+
+function initCanvasBack(query){
+  query.select('#canvas-back')
+    .fields({ node: true, size: true })
+    .exec((res) => {
+      canvasb = res[0].node;
+      ctxb = canvasb.getContext('2d');
+      canvasb.width = res[0].width * dpr;
+      canvasb.height = res[0].height * dpr; 
+      ctxb.scale(dpr, dpr);
+      ctxb.translate(0, globalSize);
+      mesh(ctxb, 0, globalSize);
+      mark(ctxb);
+      //ctxb.globalCompositeOperation = 'destination-over';
+    })
 }
 
 Page({
@@ -238,35 +263,9 @@ Page({
   },
   
   onReady() {
-    const query = wx.createSelectorQuery()
-    query.select('#canvas-front')
-      .fields({ node: true, size: true })
-      .exec((res) => {
-        canvasf = res[0].node;
-        ctxf = canvasf.getContext('2d');
-        dpr = wx.getWindowInfo().pixelRatio;
-        canvasf.width = res[0].width * dpr;
-        canvasf.height = res[0].height * dpr; 
-        console.log("canvas px: ",canvasf.width, "x", canvasf.height);    
-        ctxf.scale(dpr, dpr);
-        ctxf.lineWidth = 0;
-        //ctxf.strokeStyle = 'rgb(0, 0, 0)';
-        ctxf.translate(0, globalSize);
-        console.log("canvas ok")
-      })
-    query.select('#canvas-back')
-    .fields({ node: true, size: true })
-    .exec((res) => {
-      canvasb = res[0].node;
-      ctxb = canvasb.getContext('2d');
-      canvasb.width = res[0].width * dpr;
-      canvasb.height = res[0].height * dpr; 
-      ctxb.scale(dpr, dpr);
-      ctxb.translate(0, globalSize);
-      mesh(ctxb, 0, globalSize);
-      mark(ctxb);
-      //ctxb.globalCompositeOperation = 'destination-over';
-    })
+    const query = wx.createSelectorQuery();
+    initCanvasFront(query);
+    initCanvasBack(query);
   },
 
   onShow(){
@@ -397,7 +396,7 @@ Page({
       });
 
 
-      if (cne >= noiseAlarmLevel && !isAlarming) {
+      if (allowAlarm && cne >= noiseAlarmLevel && !isAlarming) {
         isAlarming = true;
         wx.vibrateLong(); // 触发震动警报
         wx.showModal({
