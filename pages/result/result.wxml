@@ -16,31 +16,17 @@
   </view>
 </template>
 
-<template name="listedDetailedResult">
-  <view class="card" hover-class="card--pressed">
-    <view class="card__body">
-      <text class="card__title">{{date}}</text>
-      <text class="card__desc">记录时长：{{duration}} (s)</text>
-      <text class="card__desc">预计暴露时间：{{exposure}} (s)</text>
-      <text class="card__desc">CNE值：{{cne}} (dB(A))</text>
-      <text class="card__desc">预估危险水平：{{threat}}</text>
-      <text class="card__desc">麦克风偏移量：{{offset}}</text>
-      <text class="card__desc">设备标识：{{device}}</text>
-      <text class="card__desc">操作系统：{{system}}</text>
-      <text class="card__desc">版本戳：{{vstamp}}</text>
-    </view>
-  </view>
-</template>
-
 <view class="page">
-  <button class="btn btn--primary" bindtap="">清空结果</button>
+  <button wx:if="{{!isEmpty}}" class="btn btn--primary" bindtap="confirmDeleteAll">清空记录</button>
   <view class="grid">
+    <view class="text-no-result" wx:if="{{isEmpty}}">当前无记录</view>
     <block wx:for="{{savedResult}}" wx:key="index">
       <view 
         class="card{{activeIndex === index ? '-active' : ''}}"
         hover-class="card--pressed"
         data-index="{{index}}"
         bindtap="handleCardTap"
+        bind:longpress="handleCardLongPress"
       >
         <template is="listedResult" data="{{...item}}"/>
       </view>

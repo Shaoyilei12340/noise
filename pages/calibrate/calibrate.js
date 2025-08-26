@@ -244,7 +244,7 @@ Page({
     类型为${this.data.presetCalibration} ，偏移量为${offset}
     `;
     wx.showModal({
-      title: '应用校准',
+      title: "应用校准",
       content: str,
       success (res) {
         if (res.confirm) {

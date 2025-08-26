@@ -1,8 +1,8 @@
 // app.js
 App({
   globalData:{
-    version: "Alpha 0.2.2.20250818.1",
-    vstamp:"a.0.2.2.20250818.1",
+    version: "Alpha 0.2.2.20250826.1",
+    vstamp:"a.0.2.2.20250826.1",
     init: false,
   },
 
@@ -40,8 +40,7 @@ App({
 
   onLaunch () {
     console.log("app start");
-    this.globalData.init = wx.getStorageSync('init');
-   
+    this.globalData.init = wx.getStorageSync('init'); 
     wx.getSetting({
       success(res) {
         if (!res.authSetting['scope.record']) {
@@ -67,7 +66,5 @@ App({
       this.initApp();
       this.globalData.init = true;
     }
-    
   },
- 
 })

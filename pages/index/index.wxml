@@ -1,26 +1,8 @@
-<!--
-<view class="container">
-  <view class="title">噪声累积量测量</view>
-  
-
-  
-  <view class="nav-buttons">
-    <button bindtap="noiseDetect" style="position: relative; left: 197rpx; top: 365rpx; width: 700rpx; display: block; box-sizing: border-box; height: 100rpx">开始噪声监测</button>
-    <button bindtap="goToResult" style="position: relative; left: -256rpx; top: 754rpx; width: 450rpx; display: block; box-sizing: border-box; height: 100rpx">查看结果</button>
-    
-    //<button bindtap="goToSettings" style="position: relative; left: -29rpx; top: 754rpx; height:  //85rpx; display: block; box-sizing: border-box">设置</button>
-    
-  </view>
-</view>
--->
 <!-- pages/index/index.wxml -->
 <view class="page">
   <!-- 顶部氛围图 -->
   <image class="hero" src="/images/Doctors-pana.svg" mode="aspectFit" />
-
-  
   <view class="grid">
-
     <!-- ① 开始检测 -->
     <view class="card" hover-class="card--pressed" bindtap="noiseDetect">
       <image class="card__icon" src="/images/mic.svg" />
@@ -29,7 +11,8 @@
         <text class="card__desc">实时录音 · 10 秒出结果</text>
       </view>
     </view>
-
+    
+    <!-- ② 麦克风校准 -->
     <view class="card" hover-class="card--pressed" bindtap="goToCalibrate">
       <image class="card__icon" src="/images/mic.svg" />
       <view class="card__body">
@@ -38,16 +21,16 @@
       </view>
     </view>
 
-    <!-- ② 查询结果 -->
+    <!-- ③ 查询记录 -->
     <view class="card" hover-class="card--pressed" bindtap="goToResult">
       <image class="card__icon" src="/images/chart.svg" />
       <view class="card__body">
-        <text class="card__title">查询结果</text>
-        <text class="card__desc">历史记录 · 趋势分析</text>
+        <text class="card__title">查询记录</text>
+        <text class="card__desc">历史结果 · 趋势分析</text>
       </view>
     </view>
 
-    <!-- ③ 噪声危害科普 -->
+    <!-- ④ 噪声危害科普 -->
     <view class="card" hover-class="card--pressed" bindtap="goToKnowledge">
       <image class="card__icon" src="/images/book.svg" />
       <view class="card__body">
@@ -56,7 +39,7 @@
       </view>
     </view>
 
-    <!-- ④ 关于本项目 -->
+    <!-- ⑤ 关于本项目 -->
     <view class="card" hover-class="card--pressed" bindtap="goToAbout">
       <image class="card__icon" src="/images/book.svg" />
       <view class="card__body">
