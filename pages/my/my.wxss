@@ -21,6 +21,9 @@
   font-size: 32rpx;
   color: #333;
 }
+.userGroup {
+  color: rgb(240, 159, 8);
+}
 
 /* 功能列表 */
 .menu-list {

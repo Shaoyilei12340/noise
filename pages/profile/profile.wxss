@@ -1,0 +1,115 @@
+/* pages/profile/profile.wxss */
+/**index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.scrollarea {
+  flex: 1;
+  overflow-y: hidden;
+}
+
+.userinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #aaa;
+  width: 80%;
+}
+
+.userinfo-avatar {
+  overflow: hidden;
+  width: 128rpx;
+  height: 128rpx;
+  margin: 20rpx;
+  border-radius: 50%;
+}
+
+.usermotto {
+  margin-top: 200px;
+}
+
+.avatar-wrapper {
+  padding: 0;
+  width: 70px !important;
+  border-radius: 8px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  vertical-align: middle;
+  width: 100px;
+  height: 100px;
+  background: #ffffff;
+}
+
+.avatar {
+  vertical-align: middle;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.nickname-wrapper {
+  display: flex;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  border-top: .5px solid rgba(0, 0, 0, 0.1);
+  border-bottom: .5px solid rgba(0, 0, 0, 0.1);
+  color: black;
+}
+
+.nickname-label {
+  width: 105px;
+}
+
+.nickname-input {
+  flex: 1;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+.cell:first-child {
+  border-top: none;
+}
+
+.cell__label {
+  font-size: 30rpx;
+  color: rgb(0, 0, 0);
+  flex-shrink: 0;
+}
+.cell__right {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+
+.btn {
+  margin: 20rpx 30rpx;
+  padding: 20rpx;
+  font-size: 30rpx;
+  border-radius: 16rpx;
+}
+.btn--primary {
+  background:  #11c71a;
+  color: white;
+  margin-top: 100px;
+}
+.btn--ghost {
+  background: transparent;
+  color: #4facfe;
+  border: 2rpx solid #4facfe;
+}
+.btn--plain {
+  background: #f5f5f5;
+  color: #333;
+}
+
+
+
