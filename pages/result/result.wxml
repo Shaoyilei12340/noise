@@ -1,12 +1,15 @@
 <template name="listedResult">
   <view>
     <view class="card__body">
-      <text class="card__title">{{date}}</text>
+      <text class="card__title">{{name || date}}</text>
+      <text class="card__desc">检测时间：{{date}} </text>
       <text class="card__desc">记录时长：{{duration}} (s)</text>
       <text class="card__desc">预计暴露时间：{{exposure}} (s)</text>
       <text class="card__desc">CNE值：{{cne}} (dB(A))</text>
       <text class="card__desc">预估危险水平：{{threat}}</text>
       <view class="detailed-info">
+        <text class="card__desc" wx:if="{{!location}}">位置经纬度：{{"未授权记录"}}</text>
+        <text class="card__desc" wx:if="{{location}}">位置经纬度：{{location.latitude}}, {{location.longitude}}（gcj02）</text>
         <text class="card__desc">麦克风偏移量：{{offset}}</text>
         <text class="card__desc">设备标识：{{device}}</text>
         <text class="card__desc">操作系统：{{system}}</text>

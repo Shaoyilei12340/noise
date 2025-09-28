@@ -2,7 +2,7 @@ const app = getApp();
 const recorderManager = wx.getRecorderManager();
 var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
 var startDate, offset, dBArray, time, cne, threat, buffer, expectedExposure, noiseAlarmLevel;
-var allowAlarm = true, isAlarming = false;
+var location, allowAlarm = true, isAlarming = false;
 
 function getTimeTerm(time=28800){
   return 10 * Math.log10(time);
@@ -301,11 +301,13 @@ Page({
     let device = d.brand + ' ' + d.model;
     let system = d.system;
     const data = {
+      name:null,
       date:currentDate,
       duration:duration.toFixed(3),
       exposure:expectedExposure,
       cne:this.data.cne,
       threat:this.data.threat,
+      location:location,
       extra:null,
       device:device,
       system:system,
@@ -347,6 +349,31 @@ Page({
     recorderManager.stop();
     audioCtx.close();
     wx.navigateBack();
+  },
+
+  recordMyLocation(){
+    wx.showLoading({
+      title: '获取位置信息',
+    });
+    wx.getLocation({
+      type: 'gcj02',
+      altitude: true,
+      isHighAccuracy: true,
+      highAccuracyExpireTime: 3500,
+      success (res) {
+        location = {
+          latitude : res.latitude,
+          longitude : res.longitude,
+          altitude : res.altitude,
+          accuracy : res.accuracy,
+        }
+        console.log(location);  
+      }
+     })
+     setTimeout(function () {
+      wx.hideLoading()
+    }, 3000)
+    console.log(location);
   },
 
   noiseDetect: function () {

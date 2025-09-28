@@ -1,4 +1,4 @@
-/* pages/index/index.wxss */
+/* pages/pilot/pilot.wxss */
 page {
   background: #f5f7fa;
   padding-bottom: constant(safe-area-inset-bottom);
@@ -26,6 +26,7 @@ page {
   display: flex;
   align-items: center;
   padding: 36rpx 40rpx;
+  margin-bottom: 50px;
   background: #fff;
   border-radius: 24rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
@@ -71,4 +72,8 @@ page {
   text-align: center;
   font-size: 24rpx;
   color: #999;
+}
+
+.e {
+  margin-top: 150px;
 }

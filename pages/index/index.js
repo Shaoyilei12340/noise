@@ -24,6 +24,12 @@ Page({
     });
   },
 
+  goToPilot(){
+    wx.navigateTo({
+      url: '/pages/pilot/pilot'
+    })
+  },
+
   goToKnowledge: function() {
     wx.navigateTo({
       url: '/pages/knowledge/knowledge'

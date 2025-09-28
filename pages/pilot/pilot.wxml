@@ -1,0 +1,30 @@
+<!--pages/pilot/pilot.wxml-->
+<view class="page">
+  <view class="e"></view>
+  <view class="grid">
+    <view class="card" hover-class="card--pressed" bindtap="goToUsage">
+      <image class="card__icon" src="/images/info.svg" />
+      <view class="card__body">
+        <text class="card__title">如何检测</text>
+        <text class="card__desc">关于检测的注意事项</text>
+      </view>
+    </view>
+    <!-- ① 开始检测 -->
+    <view class="card" hover-class="card--pressed" bindtap="noiseDetect">
+      <image class="card__icon" src="/images/mic.svg" />
+      <view class="card__body">
+        <text class="card__title">开始检测</text>
+        <text class="card__desc">实时录音 · 10 秒出结果</text>
+      </view>
+    </view>
+    
+    <!-- ② 麦克风校准 -->
+    <view class="card" hover-class="card--pressed" bindtap="goToCalibrate">
+      <image class="card__icon" src="/images/calibrate.svg" />
+      <view class="card__body">
+        <text class="card__title">麦克风校准</text>
+        <text class="card__desc">声压级校正 · 偏移量测定</text>
+      </view>
+    </view>
+  </view>
+</view>

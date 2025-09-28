@@ -47,13 +47,15 @@ Page({
   handleCardLongPress(e){
     let instance = this;
     const index = e.currentTarget.dataset.index;
-    let options = ['删除此记录'];
+    let options = ['查看记录位置','重命名记录','删除此记录'];
     console.group("handleCardLongPress");
     console.log(e);
     wx.showActionSheet({
       itemList: options,
       success (res) {
-        if(res.tapIndex === 0){instance.delete(index, 1);}
+        if(res.tapIndex === 0){instance.checkLocation(index);}
+        if(res.tapIndex === 1){instance.rename(index);}
+        if(res.tapIndex === 2){instance.delete(index, 1);}
       },
       fail (res) {
         console.log(res.errMsg)
@@ -71,6 +73,7 @@ Page({
     wx.showModal({
       title: "清空记录",
       content: str,
+      confirmColor: "#bb0b0b",
       success (res) {
         if (res.confirm) {
           console.log("delete all");
@@ -102,6 +105,59 @@ Page({
     savedResult.splice(index, count);
     wx.setStorageSync('savedResult', savedResult);
     this.refresh();
+    wx.showToast({
+      title: '已删除',
+      icon: 'success',
+      duration: 1500
+    });
     console.log("result: ",this.data.savedResult);
-  }
+  },
+  rename(index){
+    var instance = this;
+    let savedResult = wx.getStorageSync('savedResult');
+    var recordName = savedResult[index].name || "未命名的记录";
+    wx.showModal({
+      title: '重命名记录',
+      content: '',
+      editable: true,
+      placeholderText: recordName,
+      success (res) {
+        if (res.confirm) {
+          console.log(`rename item[${index}] to ${res.content}`);
+          savedResult[index].name = res.content;
+          wx.setStorageSync('savedResult', savedResult);
+          instance.refresh();
+          console.log("result: ",instance.data.savedResult);
+        } else if (res.cancel) {
+          console.log('rename aborted by user');
+        }
+      }
+    })
+  },
+  checkLocation(index){
+    try{
+      this._checkLocation(index);
+    }catch(e){
+      console.log(e);
+      wx.showToast({
+        title: '没有位置信息',
+        icon: 'error',
+        duration: 2000
+      });
+    }
+  },
+  _checkLocation(index){
+    var instance = this;
+    let savedResult = wx.getStorageSync('savedResult');
+    var location = savedResult[index].location;
+    var latitude = location.latitude;
+    var longitude = location.longitude;
+    wx.openLocation({
+      name:"噪声监测地点",
+      address:"请以实际地点为准",
+      latitude,
+      longitude,
+      scale: 18
+    })
+  },
 })

@@ -4,22 +4,23 @@
   <image class="hero" src="/images/Doctors-pana.svg" mode="aspectFit" />
   <view class="grid">
     <!-- ① 开始检测 -->
-    <view class="card" hover-class="card--pressed" bindtap="noiseDetect">
+    <view class="card" hover-class="card--pressed" bindtap="goToPilot">
       <image class="card__icon" src="/images/mic.svg" />
       <view class="card__body">
-        <text class="card__title">开始检测</text>
-        <text class="card__desc">实时录音 · 10 秒出结果</text>
+        <text class="card__title">检测前准备</text>
+        <text class="card__desc">先校准 · 再检测</text>
       </view>
     </view>
     
-    <!-- ② 麦克风校准 -->
+    <!-- ② 麦克风校准 
     <view class="card" hover-class="card--pressed" bindtap="goToCalibrate">
-      <image class="card__icon" src="/images/mic.svg" />
+      <image class="card__icon" src="/images/calibrate.svg" />
       <view class="card__body">
         <text class="card__title">麦克风校准</text>
         <text class="card__desc">声压级校正 · 偏移量测定</text>
       </view>
     </view>
+    -->
 
     <!-- ③ 查询记录 -->
     <view class="card" hover-class="card--pressed" bindtap="goToResult">
@@ -41,7 +42,7 @@
 
     <!-- ⑤ 关于本项目 -->
     <view class="card" hover-class="card--pressed" bindtap="goToAbout">
-      <image class="card__icon" src="/images/book.svg" />
+      <image class="card__icon" src="/images/info.svg" />
       <view class="card__body">
         <text class="card__title">关于本项目</text>
         <text class="card__desc">项目说明</text>

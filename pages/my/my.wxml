@@ -2,13 +2,14 @@
 
 <!-- 顶部用户信息 -->
 <view class="user-info">
-  <image class="avatar" src="{{userInfo.avatarUrl || '/images/user.png'}}" bindtap="login" mode="aspectFill" />
-  <text class="nickname" bindtap="login">{{userInfo.nickName || '点击登录'}}</text>
+  <image class="avatar" src="{{userInfo.avatarUrl ||'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}" bindtap="login" mode="aspectFill" />
+  <text class="nickname" bindtap="login">{{userInfo.nickname || '点击登录'}}</text>
+  <text class="userGroup" wx:if="{{isLoggedIn&&userInfo.groupType}}" >{{userInfo.groupType || ''}}</text>
 </view>
 
 <!-- 功能列表 -->
 <view class="menu-list">
-  <view class="menu-item" bindtap="navigateTo" data-url="/pages/orders/orders">
+  <view class="menu-item" bindtap="goToUserProfile" data-url="/pages/proflie/profile">
     <text>个人信息</text>
     <!--<image class="arrow" src="/assets/icon-arrow-right.png" />-->
   </view>
@@ -19,7 +20,7 @@
 </view>
 
 <!-- 退出登录按钮（可选） -->
-<button wx:if="{{userInfo.nickName}}" class="logout-btn" bindtap="logout">退出登录</button>
+<button wx:if="{{isLoggedIn}}" class="logout-btn" bindtap="logout">退出登录</button>
 
 <view class="footer">
   <text>
@@ -27,4 +28,5 @@
   {{version}}<br /> 
   内部评估版本
   </text>
+  <text wx:if="{{isLoggedIn}}"> <br />UID: {{userInfo.userId}}</text>
 </view>

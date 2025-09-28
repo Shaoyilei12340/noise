@@ -7,7 +7,10 @@
     "pages/my/my",
     "pages/knowledge/knowledge",
     "pages/about/about",
-    "pages/calibrate/calibrate"
+    "pages/calibrate/calibrate",
+    "pages/profile/profile",
+    "pages/pilot/pilot",
+    "pages/usage/usage"
   ],
   "tabBar": {
     "selectedColor": "#b4282d",
@@ -26,6 +29,14 @@
         "selectedIconPath": "images/my.png"
       }
     ]
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "麦克风权限用于收录并分析环境噪声分贝听力级和噪声累积能量"
+    },
+    "scope.userLocation": {
+      "desc": "位置信息用于小程序收录环境音频时辅助记录位置信息（可选）"
+    }
   },
   "window": {
     "backgroundTextStyle": "light",

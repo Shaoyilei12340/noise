@@ -1,9 +1,12 @@
 // app.js
 App({
   globalData:{
-    version: "Alpha 0.2.2.20250826.1",
-    vstamp:"a.0.2.2.20250826.1",
+    version: "Alpha 0.3.0.20250928.1",
+    vstamp:"a.0.3.0.20250928.1",
     init: false,
+    server:"http://47.117.40.74:9999",
+    isLoggedIn: wx.getStorageSync('isLoggedIn'),
+    userInfo:wx.getStorageSync('userInfo'),
   },
 
   ioLog(key, value, option){
@@ -45,6 +48,7 @@ App({
       success(res) {
         if (!res.authSetting['scope.record']) {
           wx.authorize({
+            desc: '用于分析环境噪声分贝听力级和噪声累积能量',
             scope: 'scope.record',
             success () {
               // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
