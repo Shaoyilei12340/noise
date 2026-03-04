@@ -259,7 +259,7 @@ Page({
     encodeBitRate: 24000,
     format:'PCM',
     frameSize: 16,      // 每帧采样点数
-    audioSource:'auto',
+    audioSource:'camcorder',
   },
   
   onReady() {
@@ -398,22 +398,16 @@ Page({
       const dbfs = calculatedb(energy);
       const dbspl = dbfs + offset;
       
+      time++;
+      console.log("recorded: ",time)
+      recordArray(time, dbspl);
+      draw(ctxf, time);
+      cne = calculateShortCNE(dBArray, time);
+      console.log("cne: ",cne);
+      threat = evaluateRisk(cne);
+      console.log("threat: ",threat);
+      console.groupEnd();
 
-      setTimeout(function () {
-        time++;
-        console.log("recorded: ",time)
-        recordArray(time, dbspl);
-        draw(ctxf, time);
-        try{
-          cne = calculateShortCNE(dBArray, time);
-        }catch(Error){
-          console.log(Error);
-        }  
-        console.log("cne: ",cne);
-        threat = evaluateRisk(cne);
-        console.log("threat: ",threat);
-        console.groupEnd();
-      }, 1000)
 
       this.setData({
         dbfs: dbfs.toFixed(4),

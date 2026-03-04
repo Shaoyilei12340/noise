@@ -149,11 +149,12 @@ Page({
   _checkLocation(index){
     var instance = this;
     let savedResult = wx.getStorageSync('savedResult');
+    var name = savedResult[index].name;
     var location = savedResult[index].location;
     var latitude = location.latitude;
     var longitude = location.longitude;
     wx.openLocation({
-      name:"噪声监测地点",
+      name:name || "噪声监测地点",
       address:"请以实际地点为准",
       latitude,
       longitude,

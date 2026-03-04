@@ -10,7 +10,9 @@
     "pages/calibrate/calibrate",
     "pages/profile/profile",
     "pages/pilot/pilot",
-    "pages/usage/usage"
+    "pages/usage/usage",
+    "pages/advanced-calibrate/advanced-calibrate",
+    "pages/advanced-calibrate/calibrate/calibrate"
   ],
   "tabBar": {
     "selectedColor": "#b4282d",

@@ -2,6 +2,13 @@ const app = getApp();
 const recorderManager = wx.getRecorderManager();
 var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
 var offset, dBArray, time, buffer, stopCalibration = false;
+// 新增：校准积分专用变量
+let isCalibrating = false;
+let calibEnergySum = 0;
+let calibSamples = 0;
+let calibTargetSPL = 0;
+let calibName = "";
+let frameCount = 0; // 用于修正时间轴频率
 
 function calculateRMS(pcmData) {
   let sumSquares = 0;
@@ -159,6 +166,8 @@ Page({
     dbspl: 0,
     dbfsSlientRoom:0,
     dbfs1mTalk:0,
+    dbfs1k80:0,
+    offset1k80:0,
     offsetSlientRoom:0,
     offset1mTalk:0,
     presetCalibration:"无",
@@ -171,7 +180,7 @@ Page({
     encodeBitRate: 24000,
     format:'PCM',
     frameSize: 16,      // 每帧采样点数
-    audioSource:'auto',
+    audioSource:'camcorder',
   },
   
   onReady() {
@@ -196,6 +205,24 @@ Page({
     recorderManager.stop();
     audioCtx.close();
     wx.navigateBack();
+  },
+
+  calibrate1k80()
+  {
+    /**
+       * 执行设备校准
+       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
+       * @param {number} measuredDBFS - 测量到的dBFS值
+     */
+    let measuredDBFS=this.data.dbfs, knownDBSPL = 80;
+    let calibrationOffset = knownDBSPL - measuredDBFS;
+    this.setData({
+      dbfs1k80:measuredDBFS,
+      offset1k80:calibrationOffset,
+      presetCalibration:"1kHz, 80dB SPL",
+      newOffset:calibrationOffset,
+    })
+    return calibrationOffset;
   },
 
   roughCalibrateSlientRoom() {   
@@ -266,38 +293,43 @@ Page({
   },
 
   noiseDetect: function () {
-    wx.showLoading({
-      title: '启动校准',
-    });
-    setTimeout(function () {
-      wx.hideLoading()
-    }, 1500)
+    wx.showLoading({ title: '启动校准' });
+    setTimeout(() => wx.hideLoading(), 1500);
     
     recorderManager.start(this.recordParams);
-    console.log('recorderManager ok');
     
     recorderManager.onFrameRecorded(res => { 
-      console.group("recordAnalysis");
-      const resbuffer = res.frameBuffer;  // 获取PCM数据
-      console.log("pcmBuffer: ",resbuffer);
-      buffer = new Int16Array(resbuffer);
-      
-      const energy = calculateRMS(buffer);
-      const dbfs = calculatedb(energy);
-      const dbspl = dbfs + offset;
+        const resbuffer = res.frameBuffer;
+        const buffer = new Int16Array(resbuffer);
+        
+        // 1. 基础物理计算
+        const energy = calculateRMS(buffer);
+        const dbfs = calculatedb(energy);
+        const dbspl = dbfs + offset;
 
-      setTimeout(function () {
-        time++;
-        console.log("recorded: ",time)
-        recordArray(time, dbspl);
-        draw(ctxf, time);    
-        console.groupEnd();
-      }, 1000)
+        // 2. 修正时间轴：16KB/16kHz/16bit 约 0.5s 触发一次回调
+        // 我们每 2 帧（约1秒）更新一次画布
+        frameCount++;
+        if (frameCount % 2 === 0) {
+            time++;
+            recordArray(time, dbspl);
+            draw(ctxf, time);    
+        }
 
-      this.setData({
-        dbfs: dbfs.toFixed(4),
-        dbspl: dbspl.toFixed(4),
-      }); 
+        // 3. 核心优化：校准能量积分 (Leq)
+        if (isCalibrating) {
+            for (let i = 0; i < buffer.length; i++) {
+                let sample = buffer[i] / 32768.0; // 归一化
+                calibEnergySum += (sample * sample);
+            }
+            calibSamples += buffer.length;
+        }
+
+        // 4. 更新 UI 频率 (dbfs 依然实时显示供参考)
+        this.setData({
+            dbfs: dbfs.toFixed(2),
+            dbspl: dbspl.toFixed(2),
+        }); 
     });
   },
 })

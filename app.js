@@ -1,8 +1,8 @@
 // app.js
 App({
   globalData:{
-    version: "Alpha 0.3.0.20250928.1",
-    vstamp:"a.0.3.0.20250928.1",
+    version: "Alpha 0.4.0.20260303.3",
+    vstamp:"a.0.4.0.20260303.3",
     init: false,
     server:"http://47.117.40.74:9999",
     isLoggedIn: wx.getStorageSync('isLoggedIn'),

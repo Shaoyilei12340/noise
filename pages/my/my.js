@@ -48,7 +48,15 @@ Page({
 
   login(){
     try{
-      this._login()
+      //this._login()
+      
+      wx.showModal({
+        title: '登录未开放',
+        content: '正在测试中',
+        showCancel: false,       // 只有一个“确定”按钮
+        confirmText: '知道了',
+        confirmColor: '#4facfe'
+      });
     }catch(e){
       console.log(e);
       wx.showModal({

@@ -15,8 +15,9 @@
     <view class="noise-level">
       当前实时分贝：{{dbspl}} (dB SPL)
     </view>
-    <text>{{dbfsSlientRoom}}dbFS ~ 33dbSPL 一般安静房间，偏移量{{offsetSlientRoom}}
-      {{dbfs1mTalk}}dbFS ~ 63dbSPL 1米正常谈话，偏移量{{offset1mTalk}}
+    <text> {{dbfs1k80}} dB FS ~ 80 dB SPL 1kHz 80dB SPL，偏移量{{offset1k80}}
+    {{dbfsSlientRoom}} dB FS ~ 33 dB SPL 一般安静房间，偏移量{{offsetSlientRoom}}
+      {{dbfs1mTalk}} dB FS ~ 63 dB SPL 1米正常谈话，偏移量{{offset1mTalk}}
     </text>
     
   </view>
@@ -25,6 +26,7 @@
     <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx; position: absolute; left: 22rpx; top: -39rpx" />
   </div>
   <view class="footer">
+    <button class="btn btn--primary" bindtap="calibrate1k80" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以1kHz, 80dB SPL为基准</button>
     <button class="btn btn--primary" bindtap="roughCalibrateSlientRoom" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以一般安静房间为基准</button>
     <button class="btn btn--primary" bindtap="roughCalibrateTalk" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以一米正常谈话为基准</button>
     <button class="btn btn--ghost" bindtap="saveOffset" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">保存校准</button>

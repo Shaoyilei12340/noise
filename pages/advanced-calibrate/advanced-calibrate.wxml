@@ -1,0 +1,36 @@
+<!--pages/advanced-calibrate.wxml-->
+<view class="page">
+  <view class="e"></view>
+  <view class="grid">
+    <view class="card" hover-class="card--pressed" bindtap="importCalibration">
+      <image class="card__icon" src="/images/apply.svg" />
+      <view class="card__body">
+        <text class="card__title">一键校准</text>
+        <text class="card__desc">从 NoiCali APP 中获取</text>
+      </view>
+    </view>
+    <view class="card" hover-class="card--pressed" bindtap="goToAdvancedCalibration">
+      <image class="card__icon" src="/images/apply.svg" />
+      <view class="card__body">
+        <text class="card__title">执行专业校准</text>
+        <text class="card__desc">基于专业环境的小程序校准</text>
+      </view>
+    </view>
+    <view class="card" hover-class="card--pressed" bindtap="fetchDeviceInfo">
+      <image class="card__icon" src="/images/info.svg" />
+      <view class="card__body">
+        <text class="card__title">获取设备信息</text>
+        <text class="card__desc">导出当前设备型号及偏移量信息</text>
+      </view>
+    </view>
+    <view class="card" hover-class="card--pressed" bindtap="getNoiCali">
+      <image class="card__icon" src="/images/download.svg" />
+      <view class="card__body">
+        <text class="card__title">获取高级校准应用</text>
+        <text class="card__desc">获取 NoiCali For Android</text>
+      </view>
+    </view>
+    
+    
+  </view>
+</view>

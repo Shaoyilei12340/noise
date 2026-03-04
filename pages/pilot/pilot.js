@@ -23,5 +23,11 @@ Page({
     wx.navigateTo({
       url: '/pages/usage/usage',
     })
+  },
+
+  goToAdvancedCalibrate(){
+    wx.navigateTo({
+      url: '/pages/advanced-calibrate/advanced-calibrate',
+    })
   }
 })
