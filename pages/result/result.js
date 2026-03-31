@@ -1,14 +1,4 @@
-var isEmpty, activeIndex;
-function initData(){
-  isEmpty = true;
-  activeIndex = -1;
-}
-
-function refreshResult(){
-  let d = wx.getStorageSync('savedResult');
-  d.length ? isEmpty = false : isEmpty = true;
-  return d;
-}
+const resultManager = require('../../utils/result-manager');
 
 Page({
   data:{
@@ -18,16 +8,26 @@ Page({
   },
 
   refresh(){
+    const savedResult = resultManager.getAll();
+    let nextActiveIndex = this.data.activeIndex;
+    if (nextActiveIndex >= savedResult.length) {
+      nextActiveIndex = -1;
+    }
+
     this.setData({
-      savedResult: refreshResult(),
-      activeIndex:activeIndex,
-      isEmpty:isEmpty,
+      savedResult,
+      activeIndex: nextActiveIndex,
+      isEmpty: savedResult.length === 0,
     })
   },
   
   onShow: function() {
-    initData();
-    this.refresh();
+    const savedResult = resultManager.getAll();
+    this.setData({
+      savedResult,
+      activeIndex: -1,
+      isEmpty: savedResult.length === 0,
+    });
     console.log("result: ",this.data.savedResult);
   },
   
@@ -41,7 +41,6 @@ Page({
       // 展开新卡片
       this.setData({ activeIndex: index });
     }
-    activeIndex = this.data.activeIndex;
   },
 
   handleCardLongPress(e){
@@ -97,13 +96,19 @@ Page({
     });
   },
   delete(index, count){
-    let savedResult = wx.getStorageSync('savedResult');
     if(count === -1){
-      count = savedResult.length;
+      resultManager.clear();
+      this.refresh();
+      wx.showToast({
+        title: '已删除',
+        icon: 'success',
+        duration: 1500
+      });
+      console.log("result: ",this.data.savedResult);
+      return;
     }
     console.log(`delete item[${index}]`)
-    savedResult.splice(index, count);
-    wx.setStorageSync('savedResult', savedResult);
+    resultManager.remove(index, count);
     this.refresh();
     wx.showToast({
       title: '已删除',
@@ -114,7 +119,7 @@ Page({
   },
   rename(index){
     var instance = this;
-    let savedResult = wx.getStorageSync('savedResult');
+    let savedResult = resultManager.getAll();
     var recordName = savedResult[index].name || "未命名的记录";
     wx.showModal({
       title: '重命名记录',
@@ -124,8 +129,7 @@ Page({
       success (res) {
         if (res.confirm) {
           console.log(`rename item[${index}] to ${res.content}`);
-          savedResult[index].name = res.content;
-          wx.setStorageSync('savedResult', savedResult);
+          resultManager.rename(index, res.content);
           instance.refresh();
           console.log("result: ",instance.data.savedResult);
         } else if (res.cancel) {
@@ -148,7 +152,7 @@ Page({
   },
   _checkLocation(index){
     var instance = this;
-    let savedResult = wx.getStorageSync('savedResult');
+    let savedResult = resultManager.getAll();
     var name = savedResult[index].name;
     var location = savedResult[index].location;
     var latitude = location.latitude;

@@ -1,6 +1,7 @@
 /* pages/pilot/pilot.wxss */
+/* pages/pilot/pilot.wxss */
 page {
-  background: #f5f7fa;
+  background: #f5f7fa; /* 与 Index 一致的浅灰底色 */
   padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -9,32 +10,30 @@ page {
   padding: 40rpx;
 }
 
-.hero {
-  width: 720rpx;
-  height: 360rpx;
-  margin: 0 auto 40rpx;
-  display: block;
-}
-
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
+  gap: 80rpx; /* 卡片间距 */
 }
 
 .card {
   display: flex;
   align-items: center;
   padding: 36rpx 40rpx;
-  margin-bottom: 30px;
   background: #fff;
   border-radius: 24rpx;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  transition: background 0.2s;
 }
 
+/* 交互反馈：按下的瞬间背景变色 */
 .card--pressed {
-  background: #4facfe !important;   /* 按下的瞬间变纯蓝 */
-  /* 不加 transform / scale / opacity，图标文字就不会动 */
+  background: rgba(164, 31, 53, 0.05) !important; /* 这里使用了华师大红的极浅透明色 */
+}
+.card--pressed {
+  background: #FAFAFA !important;
+  transform: scale(0.97);
+  box-shadow: 0 2rpx 10rpx rgba(164, 31, 53, 0.05);
 }
 
 .card__icon {
@@ -51,29 +50,31 @@ page {
 .card__title {
   font-size: 32rpx;
   font-weight: 600;
+  color: #1a1a1a;
   display: block;
 }
 
 .card__desc {
   font-size: 26rpx;
-  opacity: 0.7;
+  color: #888;
   margin-top: 8rpx;
   display: block;
 }
 
+/* 右侧箭头小图标 */
 .card__arrow {
-  width: 28rpx;
-  height: 28rpx;
-  opacity: 0.5;
+  width: 24rpx;
+  height: 24rpx;
+  opacity: 0.2;
 }
 
 .tip {
-  margin-top: 60rpx;
+  margin-top: 80rpx;
   text-align: center;
   font-size: 24rpx;
   color: #999;
+  line-height: 1.6;
 }
-
 .e {
   margin-top: 125px;
 }

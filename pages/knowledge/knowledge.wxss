@@ -1,51 +1,65 @@
 /* pages/knowledge/knowledge.wxss */
 page {
-  background: #f5f7fa;
-  padding-bottom: 40rpx;
+  background: #F4F5F7;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
 }
 
-.page {
-  padding: 40rpx;
-}
+.page-container { padding: 40rpx 32rpx 60rpx; }
 
-.head {
-  text-align: center;
-  margin-bottom: 60rpx;
-}
-.title {
-  font-size: 44rpx;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-.sub {
-  display: block;
-  margin-top: 10rpx;
-  font-size: 28rpx;
-  color: #666;
-}
+/* 头部 */
+.doc-header { margin-bottom: 40rpx; padding: 0 10rpx; }
+.title { font-size: 56rpx; font-weight: 800; color: #111; display: block; margin-bottom: 8rpx; }
+.subtitle { font-size: 24rpx; font-weight: 600; color: #A41F35; letter-spacing: 2rpx; }
 
-.section {
-  margin-bottom: 60rpx;
-  background: #fff;
-  border-radius: 20rpx;
+/* 文档卡片 */
+.doc-card {
+  background: #FFFFFF;
+  border-radius: 32rpx;
   padding: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,.05);
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 32rpx;
 }
-.pic {
+
+.cover-pic {
   width: 100%;
-  height: 260rpx;
-  border-radius: 12rpx;
-  margin-bottom: 24rpx;
+  height: 320rpx;
+  border-radius: 20rpx;
+  margin-bottom: 40rpx;
+  background-color: #FAFAFA; /* 图片加载前的底色 */
+  border: 1rpx solid #F0F0F0;
 }
+
+/* 正文排版 */
+.article { display: flex; flex-direction: column; }
 .h2 {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 24rpx;
+  position: relative;
+  padding-left: 20rpx;
 }
+/* 标题左侧的红色装饰线 */
+.h2::before {
+  content: ""; position: absolute; left: 0; top: 8rpx; bottom: 8rpx;
+  width: 8rpx; background: #A41F35; border-radius: 4rpx;
+}
+
 .p {
   font-size: 30rpx;
-  line-height: 1.7;
-  color: #555;
-  white-space: pre-line;
+  line-height: 1.8;
+  color: #555555;
+  margin-bottom: 30rpx;
+  text-align: justify; /* 两端对齐更具文档感 */
 }
+
+/* 机构落款 */
+.institution {
+  margin-top: 40rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx solid #EAEAEA;
+  display: flex;
+  flex-direction: column;
+}
+.inst-name { font-size: 28rpx; font-weight: 600; color: #333; margin-bottom: 6rpx; }
+.inst-dept { font-size: 24rpx; color: #888; }

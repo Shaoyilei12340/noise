@@ -1,141 +1,82 @@
 page {
-  background: #f5f7fa;
+  background: #F4F5F7;
   padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.page {
-  padding: 40rpx;
-}
+.page { padding: 0 32rpx 40rpx; }
 
-.grid {
+/* 头部 */
+.header-bar {
   display: flex;
-  flex-direction: column;
-  gap: 32rpx;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 40rpx 10rpx 30rpx;
 }
+.page-title { font-size: 48rpx; font-weight: 800; color: #111; }
+.clear-btn { font-size: 28rpx; font-weight: 600; color: #A41F35; padding: 10rpx 0; }
 
-.container {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-.result {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-.nav-buttons {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-}
-.nav-buttons button {
-  width: 45%;
-}
+.grid { display: flex; flex-direction: column; gap: 24rpx; }
 
+/* 空状态 */
+.text-no-result { display: flex; flex-direction: column; align-items: center; padding: 120rpx 0; color: #999; font-size: 28rpx; }
+.empty-icon { width: 120rpx; height: 120rpx; opacity: 0.3; margin-bottom: 20rpx; }
+
+/* 卡片基础样式 */
 .card {
-  display: flex;
-  align-items: center;
-  padding: 36rpx 40rpx;
-  background: #fff;
+  position: relative;
+  background: #FFFFFF;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-  transition: all 0.6s ease-out;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+.card-hover { transform: scale(0.98); background: #FAFAFA; }
 
-.card--pressed {
-  background: #4facfe5b;
-  /* 不加 transform / scale / opacity，图标文字就不会动 */
-}
+/* 左侧风险色带 */
+.risk-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 12rpx; transition: background 0.3s; }
+.bg-safe { background: #46DD46; }
+.bg-medium { background: #FFB819; }
+.bg-high { background: #A41F35; }
 
-.card__icon {
-  width: 64rpx;
-  height: 64rpx;
-  margin-right: 32rpx;
-  flex-shrink: 0;
-}
+/* 卡片内容区 */
+.card-content { padding: 32rpx 32rpx 32rpx 44rpx; }
 
-.card__body {
-  flex: 1;
-}
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.header-left { display: flex; flex-direction: column; gap: 8rpx; flex: 1; }
+.card-title { font-size: 32rpx; font-weight: 700; color: #1A1A1A; }
+.card-date { font-size: 24rpx; color: #888; }
 
-.card__title {
-  font-size: 32rpx;
-  font-weight: 600;
-  display: block;
-}
+.header-right { text-align: right; }
+.cne-val { font-size: 48rpx; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cne-unit { font-size: 20rpx; color: #888; margin-left: 4rpx; font-weight: bold; }
 
-.card__desc {
-  font-size: 26rpx;
-  opacity: 0.7;
-  margin-top: 8rpx;
-  display: block;
-}
+/* 数值颜色绑定 */
+.text-safe { color: #46DD46; }
+.text-medium { color: #FFB819; }
+.text-high { color: #A41F35; }
 
-.card__arrow {
-  width: 28rpx;
-  height: 28rpx;
-  opacity: 0.5;
-}
-
-.card-active {
-  display: flex;
-  align-items: center;
-  padding: 36rpx 40rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-  background: #4facfe5b;
-  transition: all 0.6s ease-out;
-}
-.card .detailed-info {
+/* 手风琴详情区 */
+.detail-wrapper {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   transition: all 0.4s ease;
 }
-
-.card-active .detailed-info {
-  display: block;
+.card-active .detail-wrapper {
+  max-height: 600rpx; /* 足够容纳内容的高度 */
   opacity: 1;
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx dashed #EAEAEA;
 }
 
-.card-hover::before {
-  opacity: 1;
-}
+/* 详情网格布局 */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
+.detail-item { display: flex; flex-direction: column; gap: 6rpx; }
+.detail-full { grid-column: span 2; }
+.detail-label { font-size: 22rpx; color: #999; text-transform: uppercase; }
+.detail-value { font-size: 26rpx; font-weight: 500; color: #333; }
 
-.card-active::before {
-  opacity: 0;
-}
-
-.btn {
-  margin: 40rpx;
-  padding: 20rpx;
-  font-size: 30rpx;
-  border-radius: 16rpx;
-}
-.btn--primary {
-  background: linear-gradient(to right, #4facfe, #00f2fe);
-  color: white;
-}
-.btn--ghost {
-  background: transparent;
-  color: #4facfe;
-  border: 2rpx solid #4facfe;
-}
-.btn--plain {
-  background: #f5f5f5;
-  color: #333;
-}
-.text-no-result {
-  text-align: center;
-  color:#999;
-  font-size: 25rpx;
-  margin: 20rpx 30rpx;
-  padding: 200rpx;
-}
+.tip-text { font-size: 22rpx; color: #CCC; text-align: center; margin-top: 30rpx; }

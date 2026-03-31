@@ -1,10 +1,23 @@
 // app.js
+const dataModel = require('./utils/data-model');
+const { APP_CONFIG } = require('./utils/constants');
+
+function resolveServer() {
+  const override = wx.getStorageSync('serverOverride');
+  if (typeof override === 'string' && override.trim()) {
+    return override.trim();
+  }
+
+  const env = wx.getStorageSync('serverEnv') || 'default';
+  return APP_CONFIG.SERVER_BY_ENV[env] || APP_CONFIG.SERVER_BY_ENV.default;
+}
+
 App({
   globalData:{
-    version: "Alpha 0.4.0.20260303.3",
-    vstamp:"a.0.4.0.20260303.3",
+    version: "Beta 0.4.0.20260330.6",
+    vstamp:"b.0.4.0.20260330.6",
     init: false,
-    server:"http://47.117.40.74:9999",
+    server: resolveServer(),
     isLoggedIn: wx.getStorageSync('isLoggedIn'),
     userInfo:wx.getStorageSync('userInfo'),
   },
@@ -30,10 +43,11 @@ App({
       title: '初始化',
     });
     var initDataArray = new Array();
-    this.ioLog('expectedExposure', 8, 'set')
-    this.ioLog('noiseAlarmLevel', 110, 'set');
-    this.ioLog('alarm', true, 'set');
-    this.ioLog('offset', 77, 'set');
+    const defaults = dataModel.getDefaults();
+    this.ioLog('expectedExposure', defaults.expectedExposure, 'set')
+    this.ioLog('noiseAlarmLevel', defaults.noiseAlarmLevel, 'set');
+    this.ioLog('alarm', defaults.alarm, 'set');
+    this.ioLog('offset', defaults.offset, 'set');
     //this.ioLog('savedResult', initDataArray, 'set');
     this.ioLog('init', true, 'set');
     setTimeout(function () {

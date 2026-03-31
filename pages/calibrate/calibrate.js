@@ -1,335 +1,265 @@
-const app = getApp();
+// pages/calibrate/calibrate.js
 const recorderManager = wx.getRecorderManager();
-var audioCtx, canvasf, canvasb, ctxf, ctxb, dpr;
-var offset, dBArray, time, buffer, stopCalibration = false;
-// 新增：校准积分专用变量
+
+const { calculateRMS, calculateDb } = require('../../utils/audio-math');
+const { LIMITS, CANVAS_CONFIG } = require('../../utils/constants');
+const dataModel = require('../../utils/data-model');
+
+let canvasf, ctxf, dpr;
+
+// --- 全局状态变量 ---
+let offset, dBArray, time, frameCount = 0;
+let lastFrameTimestamp = 0;
+let elapsedMsAccumulator = 0;
 let isCalibrating = false;
 let calibEnergySum = 0;
 let calibSamples = 0;
-let calibTargetSPL = 0;
-let calibName = "";
-let frameCount = 0; // 用于修正时间轴频率
+let instantLimit = LIMITS.INSTANT_DB_LIMIT_DEFAULT;
+let calibrateRecorderListenerBound = false;
+let activeCalibratePage = null;
 
-function calculateRMS(pcmData) {
-  let sumSquares = 0;
-  for (let i = 0; i < pcmData.length; i++) {
-    // PCM值归一化到[-1, 1]
-    let sample = pcmData[i] ;
-    sumSquares += sample * sample;
-  }
-  return Math.sqrt(sumSquares / pcmData.length); // RMS值
-}
+const globalSize = CANVAS_CONFIG.CALIBRATE.GLOBAL_SIZE;
+const scaleX = CANVAS_CONFIG.CALIBRATE.SCALE_X;
+const scaleY = CANVAS_CONFIG.CALIBRATE.SCALE_Y;
 
-function calculatedb(rms, reference = 32767){
-  return 20 * Math.log10(Math.max(rms, 1e-12) / reference);
-}
-
-function recordArray(currentTime, dBSPL){
-  dBArray[currentTime] = dBSPL;
-}
-const globalSize = 300;
-const scaleX = 30;
-const scaleY = 3;
-
-function mesh(ctx=ctxb, mtX, ltX){
-  // translated
-  //ctx.globalCompositeOperation = 'source-in';
-  /*
-  ctx.fillStyle = 'rgb(25, 255, 255)';
-  ctx.fillRect(0, -globalSize, globalSize, globalSize);
-  ctx.lineWidth = 0;
-  */
-  // 绘制网格
-  ctx.strokeStyle = 'rgba(100, 150, 180, 1)';
+// ================= Canvas 渲染引擎 (极致性能优化版) =================
+function mesh(ctx, mtX, ltX, thresholdLine) {
+  // 1. 批量绘制基础网格 (合并路径)
+  ctx.strokeStyle = 'rgba(100, 150, 180, 0.3)';
   ctx.lineWidth = 0.2;
-  // 水平网格线
-  for (let y = 0; y < scaleY*10*14; y += scaleY*10) {
-    ctx.beginPath();
+  ctx.setLineDash([]);
+  
+  ctx.beginPath();
+  for (let db = 0; db <= 130; db += 10) {
+    const y = db * scaleY;
     ctx.moveTo(mtX, -y);
     ctx.lineTo(ltX, -y);
+  }
+  ctx.stroke();
+
+  // 2. 绘制独立的瞬时边界高亮线
+  if (thresholdLine) {
+    ctx.beginPath();
+    ctx.strokeStyle = '#A41F35'; // 警戒红
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([5, 3]);
+    const targetY = thresholdLine * scaleY;
+    ctx.moveTo(mtX, -targetY);
+    ctx.lineTo(ltX, -targetY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function mark(ctx, thresholdLine) {
+  ctx.fillStyle = '#90a4ae';
+  ctx.font = '10px Arial';
+  
+  ctx.textAlign = 'left';
+  ctx.fillText('SPL [dB(Z)]', 5, -globalSize + 15); 
+  
+  ctx.textAlign = 'right';
+  for (let db = 130; db >= 0; db -= 20) {
+    const y = db * scaleY;
+    ctx.fillText(`${db}`, globalSize - 5, -y - 3);
+  }
+  if (thresholdLine) {
+    ctx.fillStyle = '#A41F35';
+    ctx.fillText(`${thresholdLine}`, globalSize - 5, -(thresholdLine * scaleY) - 3);
+  }
+}
+
+function draw(ctx, currentTime) { 
+  // 1. 基于当前坐标系精确清空绘图区域
+  ctx.clearRect(0, -globalSize, globalSize, globalSize);
+  
+  // 2. 绘制静态背景
+  mesh(ctx, 0, globalSize, instantLimit);
+  mark(ctx, instantLimit);
+  
+  // 3. 计算波形可视窗口
+  const maxPoints = Math.floor(globalSize / scaleX); 
+  const startIdx = Math.max(1, currentTime - maxPoints + 1);
+  const xOffset = (currentTime <= maxPoints) ? 0 : (currentTime - maxPoints) * scaleX;
+  
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  
+  // 4. 动态波形分段渲染
+  for (let t = startIdx; t <= currentTime; t++) {
+    let currentDB = dBArray[t];
+    let previousDB = dBArray[t-1];
+    
+    ctx.strokeStyle = currentDB >= instantLimit ? '#A41F35' : '#4fc3f7';
+    
+    let startX = (t - 1) * scaleX - xOffset;
+    let endX = t * scaleX - xOffset;
+    
+    ctx.beginPath();
+    ctx.moveTo(startX, -previousDB * scaleY);
+    ctx.lineTo(endX, -currentDB * scaleY);
     ctx.stroke();
   }
-  /*
-  // 垂直网格线
-  for (let x = 0; x <= globalSize; x += scaleX*10) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, -globalSize);
-      ctx.stroke();
-  }
-  
-  // 绘制坐标轴
-  ctx.strokeStyle = '#4fc3f7';
-  ctx.lineWidth = 0.1;
-  ctx.beginPath();
-  ctx.moveTo(0, -globalSize);
-  ctx.lineTo(globalSize, -globalSize);
-  ctx.stroke();
-  */
 }
 
-function mark(ctx=ctxb){
-  // translated
-  // 添加刻度标签
-  ctx.fillStyle = '#90a4ae';
-  ctx.font = '8px Arial';
-  ctx.textAlign = 'left';
-  for (let db = 130; db >= 0; db -= 10) {
-      const y = db*scaleY ;
-      ctx.fillText(`${db}dB`, globalSize, -y);
-  }
-}
 
-function draw(ctx=ctxf, time){ 
-  // translated
-  var t = time;
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgb(0, 0, 0)';
-  var dx = Math.min(t*scaleX, globalSize);
-  ctx.save();
-  if(t*scaleX>globalSize){
-    shiftCanvasLeft(canvasf, ctxf);
-  }
-  ctx.restore();
-  ctx.beginPath();
-  ctx.moveTo(dx-scaleX,-(dBArray[t-1])*scaleY);
-  ctx.lineTo(dx, -dBArray[t]*scaleY);
-  ctx.stroke()
-}
-function shiftCanvasLeft(canvas=canvasf, ctx=ctxf) {  
-  //ctxb.globalCompositeOperation = 'destination-atop';
-  ctx.globalCompositeOperation = 'copy';
-  ctx.translate(0, -globalSize);
-  ctx.drawImage(
-  canvas,
-  scaleX*dpr, 0, (globalSize-scaleX)*dpr, globalSize*dpr,
-  0, 0, (globalSize-scaleX), globalSize
-);
-  ctx.clearRect((globalSize-scaleX), 0, scaleX, globalSize);
-  ctx.translate(0, globalSize);
-  mesh(ctxb, globalSize-scaleX, globalSize);
-  //mark(ctxb);
-  ctx.globalCompositeOperation = 'source-over';
-  
-}
-function initMonitor(){
-  try{
-    stopCalibration = false;
-    offset = wx.getStorageSync('offset');
-    audioCtx = wx.createWebAudioContext();
-    dBArray = new Array();
-    dBArray[0]=0;
-    time = 0;
-  }catch(e){
-    console.log(e);
-  }
-}
+// ================= 页面逻辑 =================
+Page({
+  data: {
+    dbfs: '0.00',
+    dbspl: '0.00',
+    presetCalibration: "未开始",
+    newOffset: '0.00',
+  },
 
-function initCanvasFront(query){
-  query.select('#canvas-front')
-    .fields({ node: true, size: true })
-    .exec((res) => {
+  onReady() {
+    const query = wx.createSelectorQuery();
+    query.select('#canvas-front').fields({ node: true, size: true }).exec((res) => {
       canvasf = res[0].node;
       ctxf = canvasf.getContext('2d');
       dpr = wx.getWindowInfo().pixelRatio;
+      
+      // 物理像素映射
       canvasf.width = res[0].width * dpr;
-      canvasf.height = res[0].height * dpr; 
-      console.log("canvas px: ",canvasf.width, "x", canvasf.height);    
+      canvasf.height = res[0].height * dpr;   
       ctxf.scale(dpr, dpr);
-      ctxf.lineWidth = 0;
-      //ctxf.strokeStyle = 'rgb(0, 0, 0)';
       ctxf.translate(0, globalSize);
-      console.log("canvas ok")
-    })
-}
-
-function initCanvasBack(query){
-  query.select('#canvas-back')
-    .fields({ node: true, size: true })
-    .exec((res) => {
-      canvasb = res[0].node;
-      ctxb = canvasb.getContext('2d');
-      canvasb.width = res[0].width * dpr;
-      canvasb.height = res[0].height * dpr; 
-      ctxb.scale(dpr, dpr);
-      ctxb.translate(0, globalSize);
-      mesh(ctxb, 0, globalSize);
-      mark(ctxb);
-      //ctxb.globalCompositeOperation = 'destination-over';
-    })
-}
-
-
-Page({
-  data:{
-    dbfs: 0,
-    dbspl: 0,
-    dbfsSlientRoom:0,
-    dbfs1mTalk:0,
-    dbfs1k80:0,
-    offset1k80:0,
-    offsetSlientRoom:0,
-    offset1mTalk:0,
-    presetCalibration:"无",
-    newOffset:0,
-  },
-  recordParams: {
-    duration: 600000,
-    sampleRate: 16000,    // 采样率（Hz）
-    numberOfChannels: 1,
-    encodeBitRate: 24000,
-    format:'PCM',
-    frameSize: 16,      // 每帧采样点数
-    audioSource:'camcorder',
-  },
-  
-  onReady() {
-    const query = wx.createSelectorQuery();
-    initCanvasFront(query);
-    initCanvasBack(query);
+    });
   },
 
-  onShow(){
-    initMonitor();
+  onShow() {
+    activeCalibratePage = this;
+    this.initMonitor();
     this.noiseDetect();
   },
-  onHide(){
-    this.stopNoiseMonitoring();
-  },
 
-  onUnload(){
-    this.stopNoiseMonitoring();
-  },
-
-  stopNoiseMonitoring: function() {
+  onHide() {
     recorderManager.stop();
-    audioCtx.close();
+    activeCalibratePage = null;
+  },
+
+  initMonitor() {
+    offset = dataModel.getOffset();
+    this.setData({ newOffset: offset.toFixed(2) });
+    
+    dBArray =[];
+    time = 0;
+    frameCount = 0;
+    lastFrameTimestamp = 0;
+    elapsedMsAccumulator = 0;
+    isCalibrating = false;
+  },
+
+  doRoughCalibrate(e) {
+    const targetSPL = parseFloat(e.currentTarget.dataset.spl);
+    const targetName = e.currentTarget.dataset.name;
+    instantLimit = targetSPL; // 图表动态显示目标红线
+    
+    // 开启积分
+    isCalibrating = true;
+    calibEnergySum = 0;
+    calibSamples = 0;
+    
+    wx.showLoading({ title: '环境采样中...', mask: true });
+
+    // 采集 2 秒钟的数据求等效连续均值
+    setTimeout(() => {
+      isCalibrating = false;
+      wx.hideLoading();
+      
+      if (calibSamples === 0) {
+        wx.showToast({ title: '采样失败', icon: 'error' });
+        return;
+      }
+
+      const meanSquare = calibEnergySum / calibSamples;
+      const rms = Math.sqrt(meanSquare);
+      const leqDbfs = calculateDb(rms, 1.0);
+      const calibrationOffset = targetSPL - leqDbfs;
+
+      this.setData({
+        presetCalibration: targetName,
+        newOffset: calibrationOffset.toFixed(2),
+      });
+
+      wx.showToast({ title: '参数已生成', icon: 'success' });
+    }, 2000);
+  },
+
+  saveOffset() {
+    const val = parseFloat(this.data.newOffset);
+    wx.showModal({
+      title: '应用校准',
+      content: `确定将偏移量设为 ${val} dB 吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          dataModel.setOffset(val);
+          wx.showToast({ title: '已保存' });
+          setTimeout(() => wx.navigateBack(), 1000);
+        }
+      }
+    });
+  },
+
+  noiseDetect() {
+    if (!calibrateRecorderListenerBound) {
+      recorderManager.onFrameRecorded(res => {
+      const page = activeCalibratePage;
+      if (!page) {
+        return;
+      }
+      const buffer = new Int16Array(res.frameBuffer);
+      const dbfs = calculateDb(calculateRMS(buffer), 32768.0);
+      
+      // 积分采样期
+      if (isCalibrating) {
+        for (let i = 0; i < buffer.length; i++) {
+          let s = buffer[i] / 32768.0;
+          calibEnergySum += s * s;
+        }
+        calibSamples += buffer.length;
+      }
+
+      frameCount++;
+      const now = Date.now();
+      if (lastFrameTimestamp === 0) {
+        lastFrameTimestamp = now;
+        return;
+      }
+      elapsedMsAccumulator += (now - lastFrameTimestamp);
+      lastFrameTimestamp = now;
+      
+      if (elapsedMsAccumulator >= 1000) {
+        elapsedMsAccumulator -= 1000;
+        time++;
+        
+        if (time === 1) dBArray[0] = dbfs + offset;
+        dBArray[time] = dbfs + offset;
+        
+        draw(ctxf, time);
+        
+        page.setData({ 
+          dbfs: dbfs.toFixed(2), 
+          dbspl: (dbfs + offset).toFixed(2) 
+        });
+      }
+      });
+      calibrateRecorderListenerBound = true;
+    }
+
+    recorderManager.start({
+      sampleRate: 16000, numberOfChannels: 1, format: 'PCM', frameSize: 16, audioSource: 'camcorder'
+    });
+  },
+
+  stopNoiseMonitoring() {
+    recorderManager.stop();
     wx.navigateBack();
   },
 
-  calibrate1k80()
-  {
-    /**
-       * 执行设备校准
-       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
-       * @param {number} measuredDBFS - 测量到的dBFS值
-     */
-    let measuredDBFS=this.data.dbfs, knownDBSPL = 80;
-    let calibrationOffset = knownDBSPL - measuredDBFS;
-    this.setData({
-      dbfs1k80:measuredDBFS,
-      offset1k80:calibrationOffset,
-      presetCalibration:"1kHz, 80dB SPL",
-      newOffset:calibrationOffset,
-    })
-    return calibrationOffset;
-  },
-
-  roughCalibrateSlientRoom() {   
-    /**
-       * 执行设备校准
-       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
-       * @param {number} measuredDBFS - 测量到的dBFS值
-     */
-    let measuredDBFS=this.data.dbfs, knownDBSPL = 33;
-    let roughCalibrationOffset = knownDBSPL - measuredDBFS;
-    this.setData({
-      dbfsSlientRoom:measuredDBFS,
-      offsetSlientRoom:roughCalibrationOffset,
-      presetCalibration:"一般安静房间",
-      newOffset:roughCalibrationOffset,
-    })
-    return roughCalibrationOffset;
-  },
-  
-  roughCalibrateTalk() {
-    /**
-       * 执行设备校准
-       * @param {number} knownDBSPL - 已知参考声压级 (dBSPL)
-       * @param {number} measuredDBFS - 测量到的dBFS值
-     */
-    let measuredDBFS=this.data.dbfs, knownDBSPL = 63;
-    let roughCalibrationOffset = knownDBSPL - measuredDBFS;
-    this.setData({
-      dbfs1mTalk:measuredDBFS,
-      offset1mTalk:roughCalibrationOffset,
-      presetCalibration:"一米正常谈话",
-      newOffset:roughCalibrationOffset,
-    })
-    return roughCalibrationOffset;
-  },
-  
-  autoCalibrateTraffic(knownDBSPL, measuredDBFS) {
-    //
-  },
-
-  saveOffset(){
-    let calibration = this;
-    let offset = calibration.data.newOffset;
-    let str = `
-    您即将应用以下校准：
-    类型为${this.data.presetCalibration} ，偏移量为${offset}
-    `;
-    wx.showModal({
-      title: "应用校准",
-      content: str,
-      success (res) {
-        if (res.confirm) {
-          wx.setStorageSync('offset', offset);
-          offset = wx.getStorageSync('offset');
-          console.log(`set offset to ${offset} by user`);
-          stopCalibration = true;
-        } else if (res.cancel) {
-          console.log('calibration aborted by user');
-        }
-      },
-      complete(){
-        if(stopCalibration){
-          console.log('stop calibration');
-          calibration.stopNoiseMonitoring();
-        }
-      }
-    })
-  },
-
-  noiseDetect: function () {
-    wx.showLoading({ title: '启动校准' });
-    setTimeout(() => wx.hideLoading(), 1500);
-    
-    recorderManager.start(this.recordParams);
-    
-    recorderManager.onFrameRecorded(res => { 
-        const resbuffer = res.frameBuffer;
-        const buffer = new Int16Array(resbuffer);
-        
-        // 1. 基础物理计算
-        const energy = calculateRMS(buffer);
-        const dbfs = calculatedb(energy);
-        const dbspl = dbfs + offset;
-
-        // 2. 修正时间轴：16KB/16kHz/16bit 约 0.5s 触发一次回调
-        // 我们每 2 帧（约1秒）更新一次画布
-        frameCount++;
-        if (frameCount % 2 === 0) {
-            time++;
-            recordArray(time, dbspl);
-            draw(ctxf, time);    
-        }
-
-        // 3. 核心优化：校准能量积分 (Leq)
-        if (isCalibrating) {
-            for (let i = 0; i < buffer.length; i++) {
-                let sample = buffer[i] / 32768.0; // 归一化
-                calibEnergySum += (sample * sample);
-            }
-            calibSamples += buffer.length;
-        }
-
-        // 4. 更新 UI 频率 (dbfs 依然实时显示供参考)
-        this.setData({
-            dbfs: dbfs.toFixed(2),
-            dbspl: dbspl.toFixed(2),
-        }); 
-    });
-  },
-})
+  onUnload() {
+    recorderManager.stop();
+    activeCalibratePage = null;
+  }
+});

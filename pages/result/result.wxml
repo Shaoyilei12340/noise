@@ -1,37 +1,72 @@
-<template name="listedResult">
-  <view>
-    <view class="card__body">
-      <text class="card__title">{{name || date}}</text>
-      <text class="card__desc">检测时间：{{date}} </text>
-      <text class="card__desc">记录时长：{{duration}} (s)</text>
-      <text class="card__desc">预计暴露时间：{{exposure}} (s)</text>
-      <text class="card__desc">CNE值：{{cne}} (dB(A))</text>
-      <text class="card__desc">预估危险水平：{{threat}}</text>
-      <view class="detailed-info">
-        <text class="card__desc" wx:if="{{!location}}">位置经纬度：{{"未授权记录"}}</text>
-        <text class="card__desc" wx:if="{{location}}">位置经纬度：{{location.latitude}}, {{location.longitude}}（gcj02）</text>
-        <text class="card__desc">麦克风偏移量：{{offset}}</text>
-        <text class="card__desc">设备标识：{{device}}</text>
-        <text class="card__desc">操作系统：{{system}}</text>
-        <text class="card__desc">版本戳：{{vstamp}}</text>
-      </view>
-    </view>
-  </view>
-</template>
-
 <view class="page">
-  <button wx:if="{{!isEmpty}}" class="btn btn--primary" bindtap="confirmDeleteAll">清空记录</button>
+  <!-- 顶部标题与操作 -->
+  <view class="header-bar">
+    <text class="page-title">监测记录</text>
+    <text wx:if="{{!isEmpty}}" class="clear-btn" bindtap="confirmDeleteAll">清空全部</text>
+  </view>
+
   <view class="grid">
-    <view class="text-no-result" wx:if="{{isEmpty}}">当前无记录</view>
+    <view class="text-no-result" wx:if="{{isEmpty}}">
+      <image class="empty-icon" src="/images/chart.svg" mode="aspectFit"></image>
+      <text>暂无监测记录</text>
+    </view>
+
+    <!-- 记录卡片列表 -->
     <block wx:for="{{savedResult}}" wx:key="index">
       <view 
-        class="card{{activeIndex === index ? '-active' : ''}}"
-        hover-class="card--pressed"
+        class="card {{activeIndex === index ? 'card-active' : ''}}"
+        hover-class="card-hover"
         data-index="{{index}}"
         bindtap="handleCardTap"
         bind:longpress="handleCardLongPress"
       >
-        <template is="listedResult" data="{{...item}}"/>
+        <!-- 动态风险色带 -->
+        <view class="risk-bar {{item.threat === '安全' ? 'bg-safe' : (item.threat === '中风险' ? 'bg-medium' : 'bg-high')}}"></view>
+
+        <view class="card-content">
+          <!-- 核心信息区 (始终显示) -->
+          <view class="card-header">
+            <view class="header-left">
+              <text class="card-title">{{item.name || '未命名记录'}}</text>
+              <text class="card-date">{{item.date}}</text>
+            </view>
+            <view class="header-right">
+              <text class="cne-val {{item.threat === '安全' ? 'text-safe' : (item.threat === '中风险' ? 'text-medium' : 'text-high')}}">{{item.cne}}</text>
+              <text class="cne-unit">CNE</text>
+            </view>
+          </view>
+
+          <!-- 详细信息区 (折叠手风琴) -->
+          <view class="detail-wrapper">
+            <view class="detail-grid">
+              <view class="detail-item">
+                <text class="detail-label">预期暴露</text>
+                <text class="detail-value">{{item.exposure}} s</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">记录时长</text>
+                <text class="detail-value">{{item.duration}} s</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">风险评估</text>
+                <text class="detail-value">{{item.threat}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-label">偏移量</text>
+                <text class="detail-value">{{item.offset}} dB</text>
+              </view>
+              <view class="detail-item detail-full">
+                <text class="detail-label">经纬度 (gcj02)</text>
+                <text class="detail-value">{{item.location ? item.location.latitude + ', ' + item.location.longitude : '未授权位置'}}</text>
+              </view>
+              <view class="detail-item detail-full">
+                <text class="detail-label">采集设备</text>
+                <text class="detail-value">{{item.device}} ({{item.system}})</text>
+              </view>
+            </view>
+            <view class="tip-text">长按卡片可重命名或删除此记录</view>
+          </view>
+        </view>
       </view>
     </block>
   </view>

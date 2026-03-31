@@ -1,25 +1,29 @@
 <!--pages/usage/usage.wxml-->
-<!--pages/knowledge/knowledge.wxml-->
-<view class="page">
-  <view class="head">
+<view class="page-container">
+  <!-- 页面头部 -->
+  <view class="doc-header">
     <text class="title">如何检测</text>
-    <text class="sub">您需要了解的注意事项</text>
+    <text class="subtitle">USAGE</text>
   </view>
-
-  <view class="section">
-    <text class="h2">为什么需要校准？\n</text>
-    <text class="p">个人移动设备间麦克风参数差异较大，所以在采集分析环境音频之前应当进行校准，未经有效校准得到的结果可能完全不可用，不具备参考价值；在任何情况下都应该采纳专业环境下使用声级计等设备获得的精确数据，本工具仅基于校准偏移量提供一定的参考意见。</text>
+  <!-- 内容卡片 -->
+  <view class="doc-card">
+    <view class="article">
+      <text class="h2">为什么需要校准？\n</text>
+      <text class="p">个人移动设备间麦克风参数差异较大，所以在采集分析环境音频之前应当进行校准，未经有效校准得到的结果可能完全不可用，不具备参考价值；在任何情况下都应该采纳专业环境下使用声级计等设备获得的精确数据，本工具仅基于校准偏移量提供一定的参考意见。</text>
+    </view>
   </view>
-
-  <view class="section">
-    <text class="h2">基于经验的校准原理是什么？\n</text>
-    <text class="p">校准过程（目前仅支持基于经验的校准）通过采集安静房间或一米正常谈话的方式与经验声压级计算差值，得到当前设备下有参考意义的偏移量（offset）。<br/>
-    计算公式：偏移量 = 经验分贝声压级 - 测得的分贝满刻度值
-    </text>
+  <view class="doc-card">
+    <view class="article">
+      <text class="h2">基于经验的校准原理是什么？\n</text>
+      <text class="p">校准过程（目前仅支持基于经验的校准）通过采集安静房间或一米正常谈话的方式与经验声压级计算差值，得到当前设备下有参考意义的偏移量（offset）。<br/>
+      计算公式：偏移量 = 经验分贝声压级 - 测得的分贝满刻度值
+      </text>
+    </view>
   </view>
-
-  <view class="section">
-    <text class="h2">可以打个比方吗？\n</text>
-    <text class="p">例如：当您身处一间安静的房间（主观上听不到噪声），可以在“麦克风校准”页面选择“以安静房间为基准”，此时小程序自动记录当前分贝满刻度值（dB FS），并将该值与安静房间的经验分贝声压级（dB SPL）计算差值（偏移量），以此应用到后续原始数据的单位换算。</text>
+  <view class="doc-card">
+    <view class="article">
+      <text class="h2">可以打个比方吗？\n</text>
+      <text class="p">例如：当您身处一间安静的房间（主观上听不到噪声），可以在“麦克风校准”页面选择“以安静房间为基准”，此时小程序自动记录当前分贝满刻度值（dB FS），并将该值与安静房间的经验分贝声压级（dB SPL）计算差值（偏移量），以此应用到后续原始数据的单位换算。</text>
+    </view>
   </view>
 </view>

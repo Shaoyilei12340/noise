@@ -1,35 +1,58 @@
-<view class="page">
-  <view class="head">
-    <text class="title">噪声累积能量测量</text>
-  </view>
-  <view class="section--advanced">
-    <view class="noise-level">
-      当前实时分贝：{{dbfs}} (dB FS)
+<view class="page-container">
+  <!-- 1. 顶部状态与仪表盘（整块变色区） -->
+  <view class="card dashboard {{threatClass}}">
+    <view class="recording-tag">
+      <view class="dot"></view>
+      <text class="tag-text">噪声监测已启动</text>
     </view>
-    <view class="noise-level">
-      当前实时分贝：{{dbspl}} (dB SPL)
-    </view>
-    <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
-      实时估算噪声累积能量：{{cne}} (dB (A))
-    </view>
-    <view class="noise-level" style="position: relative; left: 0rpx; top: 36rpx">
-      当前实时估算听损风险水平：{{threat}}
-    </view>
-  </view>
-  
-  <div class="canvas-container">
-    <canvas id="canvas-back" type="2d" style="width: 623rpx; height: 602rpx;" />
-    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx; position: absolute; left: 24rpx; top: 0rpx" />
-  </div>
-  
     
-  <view class="footer">
-    <button class="btn btn--primary" bindtap="recordMyLocation" style="position: relative; left: -10rpx; top: 627rpx; width: 341rpx; box-sizing: border-box; display: block">授权记录本次位置信息</button>
-    <button class="btn btn--primary" bindtap="_saveResult" style="position: relative; left: 2rpx; top: 627rpx; width: 308rpx; box-sizing: border-box; display: block">保存记录</button>
-    <button class="btn btn--primary" bindtap="stopNoiseMonitoring" style="position: relative; left: -2rpx; top: 600rpx; width: 308rpx; box-sizing: border-box">停止噪声监测</button>
-  </view>  
-    
-  
+    <view class="main-value">
+      <text class="db-num">{{dbspl}}</text>
+      <text class="db-unit">dB SPL</text>
+    </view>
+
+    <view class="status-pill">
+      <text class="status-text">{{threat}}</text>
+    </view>
+  </view>
+
+  <!-- 2. 辅助数据两列 -->
+  <view class="stats-row">
+    <view class="card stats-card">
+      <text class="stats-label">累积能量 (CNE)</text>
+      <view class="stats-value">
+        <text class="val">{{cne}}</text>
+        <text class="unit">dB(A)</text>
+      </view>
+    </view>
+    <view class="card stats-card">
+      <text class="stats-label">数字电平 (dBFS)</text>
+      <view class="stats-value">
+        <text class="val">{{dbfs}}</text>
+        <text class="unit">FS</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. 波形图表卡片（Canvas 居中） -->
+  <view class="card chart-card">
+    <view class="chart-header">
+      <text class="chart-title">实时分贝声压级波形 [Z计权]</text>
+    </view>
+    <view class="canvas-container">
+      <canvas id="canvas-front" type="2d" class="canvas-layer" />
+    </view>
+  </view>
+
+  <!-- 4. 底部固定操作栏（按钮比例调整） -->
+  <view class="action-bar">
+  <!-- 缩小为正方形图标按钮 -->
+  <view class="btn-mini" bindtap="recordMyLocation" hover-class="btn-hover-mini">
+    <image src="/images/locate.svg" mode="aspectFit" class="mini-icon" />
+  </view>
+
+  <!-- 占据主要空间的两个平分按钮 -->
+  <button class="btn-main btn-save" bindtap="_saveResult">保存记录</button>
+  <button class="btn-main btn-stop" bindtap="stopNoiseMonitoring">停止</button>
+  </view>
 </view>
-
-

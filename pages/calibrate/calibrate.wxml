@@ -1,37 +1,57 @@
-<view class="page">
-  <view class="head">
-    <text class="title">麦克风校准</text>
+<view class="page-container">
+  
+  <!-- 头部提示说明 -->
+  <view class="card info-card">
+    <text class="info-title">常规环境简易校准</text>
+    <text class="info-desc">利用常见环境的预估声压作为基准进行逆向推算。将执行 2 秒能量积分采样。由于环境不可控，此法可能存在 5-10dB 的误差。</text>
   </view>
-  <view class="section--advanced">
-    <view class="noise-level">
-      <text>基于经验的麦克风偏移量简易声学校准
-        计算公式：offset = known dBSPL - measured dBFS
-        注：此法误差较大，可能产生不可用的结果，因此任何情况下都推荐在隔音环境使用专业声级计（或经有效校准的设备）校准。
-      </text>
+
+  <!-- 实时示波器面板 (白底，Canvas居中) -->
+  <view class="card chart-card">
+    <view class="data-row">
+      <view class="data-item">
+        <text class="d-label">当前输入 (dBFS)</text>
+        <text class="d-val">{{dbfs}}</text>
+      </view>
+      <view class="data-item">
+        <text class="d-label">测算声压 (SPL)</text>
+        <text class="d-val text-red">{{dbspl}}</text>
+      </view>
     </view>
-    <view class="noise-level">
-      当前实时分贝：{{dbfs}} (dB FS)
+
+    <!-- Canvas 居中容器 -->
+    <view class="canvas-container">
+      <canvas id="canvas-front" type="2d" class="canvas-layer"></canvas>
     </view>
-    <view class="noise-level">
-      当前实时分贝：{{dbspl}} (dB SPL)
-    </view>
-    <text> {{dbfs1k80}} dB FS ~ 80 dB SPL 1kHz 80dB SPL，偏移量{{offset1k80}}
-    {{dbfsSlientRoom}} dB FS ~ 33 dB SPL 一般安静房间，偏移量{{offsetSlientRoom}}
-      {{dbfs1mTalk}} dB FS ~ 63 dB SPL 1米正常谈话，偏移量{{offset1mTalk}}
-    </text>
+  </view>
+
+  <!-- 校准基准操作区 -->
+  <view class="card action-card">
+    <text class="section-title">选择所在环境以开始 2 秒采样</text>
     
+    <view class="btn-group">
+      <view class="calib-btn" bindtap="doRoughCalibrate" data-spl="80" data-name="1kHz 80dB 标准音">
+        1kHz 80dB 标准纯音
+      </view>
+      <view class="calib-btn" bindtap="doRoughCalibrate" data-spl="63" data-name="一米正常谈话">
+        一米正常谈话 (~63dB)
+      </view>
+      <view class="calib-btn" bindtap="doRoughCalibrate" data-spl="33" data-name="一般安静房间">
+        一般安静房间 (~33dB)
+      </view>
+    </view>
+
+    <!-- 测算结果展示 -->
+    <view class="result-box" wx:if="{{presetCalibration !== '未开始'}}">
+      <view class="result-item">当前基准：<text>{{presetCalibration}}</text></view>
+      <view class="result-item">建议偏移量：<text class="highlight">{{newOffset}} dB</text></view>
+    </view>
   </view>
-  <div class="canvas-container">
-    <canvas id="canvas-back" type="2d" style="width: 623rpx; height: 602rpx;" />
-    <canvas id="canvas-front" type="2d" style="width: 623rpx; height: 602rpx; position: absolute; left: 22rpx; top: -39rpx" />
-  </div>
-  <view class="footer">
-    <button class="btn btn--primary" bindtap="calibrate1k80" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以1kHz, 80dB SPL为基准</button>
-    <button class="btn btn--primary" bindtap="roughCalibrateSlientRoom" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以一般安静房间为基准</button>
-    <button class="btn btn--primary" bindtap="roughCalibrateTalk" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">以一米正常谈话为基准</button>
-    <button class="btn btn--ghost" bindtap="saveOffset" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">保存校准</button>
-    <button class="btn btn--ghost" bindtap="stopNoiseMonitoring" style="position: relative; left: -16rpx; top: 627rpx; width: 308rpx; box-sizing: border-box">结束校准</button>
-  </view>  
+
+  <!-- 底部固定操作栏 (比例对齐 main.wxml) -->
+  <view class="action-bar">
+    <button class="btn-main btn-stop" hover-class="btn-hover" bindtap="stopNoiseMonitoring">结束退出</button>
+    <button class="btn-main btn-save" hover-class="btn-hover" bindtap="saveOffset">保存校准</button>
+  </view>
+
 </view>
-
-

@@ -1,36 +1,63 @@
 <!--pages/advanced-calibrate.wxml-->
-<view class="page">
-  <view class="e"></view>
-  <view class="grid">
-    <view class="card" hover-class="card--pressed" bindtap="importCalibration">
-      <image class="card__icon" src="/images/apply.svg" />
-      <view class="card__body">
-        <text class="card__title">一键校准</text>
-        <text class="card__desc">从 NoiCali APP 中获取</text>
-      </view>
+<view class="page-container">
+  
+  <!-- 顶部状态面板 -->
+  <view class="status-panel">
+    <text class="status-label">当前设备偏移量 (Offset)</text>
+    <view class="status-value-wrapper">
+      <text class="status-value">{{currentOffset > 0 ? '+' : ''}}{{currentOffset}}</text>
+      <text class="status-unit">dB</text>
     </view>
-    <view class="card" hover-class="card--pressed" bindtap="goToAdvancedCalibration">
-      <image class="card__icon" src="/images/apply.svg" />
-      <view class="card__body">
-        <text class="card__title">执行专业校准</text>
-        <text class="card__desc">基于专业环境的小程序校准</text>
-      </view>
-    </view>
-    <view class="card" hover-class="card--pressed" bindtap="fetchDeviceInfo">
-      <image class="card__icon" src="/images/info.svg" />
-      <view class="card__body">
-        <text class="card__title">获取设备信息</text>
-        <text class="card__desc">导出当前设备型号及偏移量信息</text>
-      </view>
-    </view>
-    <view class="card" hover-class="card--pressed" bindtap="getNoiCali">
-      <image class="card__icon" src="/images/download.svg" />
-      <view class="card__body">
-        <text class="card__title">获取高级校准应用</text>
-        <text class="card__desc">获取 NoiCali For Android</text>
-      </view>
-    </view>
-    
-    
   </view>
+
+  <!-- 快捷校准组 -->
+  <view class="group-title">快捷校准</view>
+  <view class="action-group">
+    <view class="action-cell" hover-class="cell-hover" bindtap="applyPresetCalibration">
+      <view class="cell-left">
+        <text class="cell-icon">☁️</text>
+        <text class="cell-text">一键匹配云端预设</text>
+      </view>
+      <text class="cell-arrow">›</text>
+    </view>
+    <view class="action-cell" hover-class="cell-hover" bindtap="importCalibration">
+      <view class="cell-left">
+        <text class="cell-icon">📋</text>
+        <text class="cell-text">从 NoiCali 导入参数</text>
+      </view>
+      <text class="cell-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 专业工具组 -->
+  <view class="group-title">专业工具</view>
+  <view class="action-group">
+    <view class="action-cell" hover-class="cell-hover" bindtap="goToAdvancedCalibration">
+      <view class="cell-left">
+        <text class="cell-icon">🎛️</text>
+        <text class="cell-text">执行声学标定 (1kHz标准)</text>
+      </view>
+      <text class="cell-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 设备与支持组 -->
+  <view class="group-title">设备与支持</view>
+  <view class="action-group">
+    <view class="action-cell" hover-class="cell-hover" bindtap="fetchDeviceInfo">
+      <view class="cell-left">
+        <text class="cell-icon">📱</text>
+        <text class="cell-text">获取本机设备信息</text>
+      </view>
+      <text class="cell-arrow">›</text>
+    </view>
+    <view class="action-cell" hover-class="cell-hover" bindtap="getNoiCali">
+      <view class="cell-left">
+        <text class="cell-icon">📥</text>
+        <text class="cell-text">下载 NoiCali App</text>
+      </view>
+      <text class="cell-arrow">›</text>
+    </view>
+  </view>
+
 </view>

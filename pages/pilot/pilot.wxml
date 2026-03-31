@@ -7,9 +7,10 @@
       <image class="card__icon" src="/images/info.svg" />
       <view class="card__body">
         <text class="card__title">如何检测</text>
-        <text class="card__desc">关于检测的注意事项</text>
+        <text class="card__desc">关于检测的重点事项</text>
       </view>
     </view>
+
     <!-- ② 麦克风校准 -->
     <view class="card" hover-class="card--pressed" bindtap="goToCalibrate">
       <image class="card__icon" src="/images/calibrate.svg" />
@@ -18,22 +19,29 @@
         <text class="card__desc">声压级校正 · 偏移量测定</text>
       </view>
     </view>
-    <!-- ③ 开始检测 -->
+
+    <!-- ③ 开始检测 (核心功能) -->
+    <!-- 建议给核心功能加一个特定的高亮类名以示区分，或者保持完全一致 -->
     <view class="card" hover-class="card--pressed" bindtap="noiseDetect">
       <image class="card__icon" src="/images/mic.svg" />
       <view class="card__body">
         <text class="card__title">开始检测</text>
-        <text class="card__desc">实时录音 · 10 秒出结果</text>
+        <text class="card__desc">实时监测 · 5秒出结果</text>
       </view>
     </view>
-     <!-- ② 麦克风校准 -->
+
+     <!-- ④ 高级校准 -->
     <view class="card" hover-class="card--pressed" bindtap="goToAdvancedCalibrate">
       <image class="card__icon" src="/images/calibrate.svg" />
       <view class="card__body">
         <text class="card__title">高级校准选项（实验性）</text>
-        <text class="card__desc"></text>
+        <text class="card__desc">实验性功能与云端预设</text>
       </view>
     </view>
     
+  </view>
+
+  <view class="tip">
+    <text>建议在安静环境下完成校准流程</text>
   </view>
 </view>

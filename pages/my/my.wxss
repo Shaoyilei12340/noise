@@ -1,62 +1,88 @@
 /* pages/my/my.wxss */
-/* 用户信息区域 */
-.user-info {
+page {
+  background: #F4F5F7;
+  font-family: -apple-system, sans-serif;
+}
+
+.page-container { padding: 40rpx 32rpx; }
+
+/* 头部名片 */
+.profile-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60rpx 0;
-  background-color: #fff;
-  border-bottom: 1rpx solid #eee;
+  padding: 60rpx 0 80rpx;
 }
 
+.avatar-wrapper { position: relative; margin-bottom: 24rpx; }
 .avatar {
-  width: 120rpx;
-  height: 120rpx;
+  width: 160rpx; height: 160rpx;
   border-radius: 50%;
-  border: 2rpx solid #e0e0e0;
+  border: 6rpx solid #FFFFFF;
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.08);
+}
+.badge {
+  position: absolute;
+  bottom: 0; right: -10rpx;
+  background: #A41F35; /* 华师大红 */
+  color: #FFF;
+  font-size: 20rpx;
+  font-weight: bold;
+  padding: 6rpx 16rpx;
+  border-radius: 100rpx;
+  border: 4rpx solid #FFF;
+  box-shadow: 0 4rpx 10rpx rgba(164, 31, 53, 0.3);
 }
 
-.nickname {
-  margin-top: 20rpx;
-  font-size: 32rpx;
-  color: #333;
-}
-.userGroup {
-  color: rgb(240, 159, 8);
-}
+.info-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8rpx; }
+.nickname { font-size: 40rpx; font-weight: 800; color: #111; }
+.uid { font-size: 24rpx; color: #888; font-family: monospace; }
 
-/* 功能列表 */
-.menu-list {
-  margin-top: 20rpx;
-  background-color: #fff;
+/* 菜单列表容器 */
+.menu-group {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
+  margin-bottom: 40rpx;
 }
 
 .menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx 40rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  padding: 36rpx 40rpx;
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #F0F0F0;
+  transition: background 0.2s;
 }
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { background: #FAFAFA; }
 
-.arrow {
-  width: 28rpx;
-  height: 28rpx;
-}
+.menu-text { font-size: 30rpx; font-weight: 500; color: #333; }
+.menu-arrow { font-size: 40rpx; color: #CCC; font-weight: 300; margin-top: -6rpx;}
 
-/* 退出登录按钮 */
-.logout-btn {
-  margin: 40rpx auto;
-  width: 80%;
-  background-color: #f56c6c;
-  color: #fff;
-  font-size: 28rpx;
-}
-.footer {
-  display: block;
-  line-height: 200%;
-  margin-top: 100rpx;
+/* 退出登录卡片按钮 */
+.logout-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 36rpx 0;
   text-align: center;
-  font-size: 24rpx;
-  color: #999;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.02);
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #A41F35; /* 警告红 */
+  transition: all 0.2s;
 }
+.btn-hover { background: #FAFAFA; transform: scale(0.98); }
+
+/* 底部声明 */
+.footer {
+  margin-top: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+.footer text { font-size: 24rpx; color: #AAA; font-weight: 500; }
+.footer .footer-sub { font-size: 22rpx; color: #CCC; }

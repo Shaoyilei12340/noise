@@ -1,16 +1,20 @@
 // pages/advanced-calibrate.js
 const app = getApp();
+const dataModel = require('../../utils/data-model');
+const { OFFSET_IMPORT_RANGE } = require('../../utils/constants');
 Page({
 
   data: {
-    currentOffset: wx.getStorageSync('offset'),
+    currentOffset: dataModel.getOffset(),
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    this.setData({
+      currentOffset: dataModel.getOffset(),
+    });
   },
 
   fetchDeviceInfo(){
@@ -82,11 +86,15 @@ Page({
 
           // 4. 校验来源并应用数据
           if (data.source === "NoiCali") {
-            const offset = data.offset;
+            const offset = parseFloat(data.offset);
             const deviceName = data.friendlyName;
+
+            if (!Number.isFinite(offset) || offset < OFFSET_IMPORT_RANGE.MIN || offset > OFFSET_IMPORT_RANGE.MAX) {
+              throw new Error("Invalid offset range");
+            }
             
             // 存入缓存
-            wx.setStorageSync('offset', offset);
+            dataModel.setOffset(offset);
 
             wx.showModal({
               title: '参数导入成功',
@@ -133,6 +141,72 @@ Page({
         }
     }
     return out;
+  },
+
+  // 一键匹配并应用云端预设校准参数
+  applyPresetCalibration() {
+    // 1. 获取当前设备信息
+    const deviceInfo = wx.getDeviceInfo();
+    
+    // 微信返回的 model 通常为 "iPhone 16 Pro<iPhone17,1>" 或 "Xiaomi 2410DPN6CC"
+    // 为了匹配绝对精准，我们将读取到的字符串去除所有空格并转为小写
+    const currentModel = deviceInfo.model.replace(/\s+/g, '').toLowerCase();
+    
+    // 2. 建立硬编码的“云端”预设数据库 (基于实验室 1kHz 80dB 测定均值)
+    const presetDatabase =[
+      { id: '2410dpn6cc', name: 'Xiaomi 15 Pro', offset: 118.806247 },
+      { id: 'iphone14,7', name: 'iPhone 14', offset: 98.146667 },
+      { id: 'iphone17,1', name: 'iPhone 16 Pro', offset: 98.210000 },
+      { id: 'iphone11,2', name: 'iPhone XS', offset: 95.076667 },
+      { id: '24115ra8ec', name: 'Redmi Note 14 Pro', offset: 99.940508 },
+      { id: 'dnp-an00', name: 'HONOR 400 Pro', offset: 102.209364 }
+    ];
+
+    // 3. 遍历匹配设备底层型号
+    let matchedDevice = null;
+    for (let i = 0; i < presetDatabase.length; i++) {
+      // 使用 includes 包含匹配，以防微信 API 在型号前后加上品牌名或括号
+      if (currentModel.includes(presetDatabase[i].id)) {
+        matchedDevice = presetDatabase[i];
+        break;
+      }
+    }
+
+    // 4. 根据匹配结果执行 UI 交互
+    if (matchedDevice) {
+      wx.showModal({
+        title: '发现设备预设校准',
+        content: `识别到您的设备为：${matchedDevice.name}\n实验室均值偏移量：${matchedDevice.offset} dB\n是否立即应用该参数？`,
+        success: (res) => {
+          if (res.confirm) {
+            // A. 应用参数到本地永久缓存
+            dataModel.setOffset(matchedDevice.offset);
+            
+            // B. (可选) 如果你希望校准页面上的数值也能立即刷新，可以在这里 setData
+            this.setData({
+              currentOffset: matchedDevice.offset.toFixed(2)
+            });
+
+            // C. 提示用户
+            wx.showToast({
+              title: '参数已应用',
+              icon: 'success',
+              duration: 2000
+            });
+            
+            console.log(`[AutoCalib] 成功匹配并应用 ${matchedDevice.name} 的参数: ${matchedDevice.offset}`);
+          }
+        }
+      });
+    } else {
+      // 未匹配到的情况：显示用户的真实设备信息，方便上报
+      wx.showModal({
+        title: '未找到预设参数',
+        content: `当前设备标识 (${deviceInfo.model}) 暂无实验室校准数据，请继续使用本页面的专业工具进行现场标定。`,
+        showCancel: false
+      });
+    }
   }
+
 
 })

@@ -5,9 +5,11 @@
  * 采用 3秒倒计时(防震防遮挡) + 5秒等效连续声级(Leq)积分算法
  */
 
-const app = getApp();
 const recorderManager = wx.getRecorderManager();
-let audioCtx, dpr;
+const { calculateRMS, calculateDb } = require('../../../utils/audio-math');
+const { LIMITS } = require('../../../utils/constants');
+const dataModel = require('../../../utils/data-model');
+let audioCtx;
 
 // --- 全局物理计算变量 ---
 let offset = 0;
@@ -19,25 +21,9 @@ let frameCount = 0;
 let isCalibrating = false;
 let calibEnergySum = 0;
 let calibSamples = 0;
-const CALIB_TARGET_SPL = 80.0; // 固定的 1kHz 纯音参考标准
-
-const globalSize = 300;
-const scaleX = 30;
-const scaleY = 3;
-
-// --- 基础物理计算函数 ---
-function calculateRMS(pcmData) {
-  let sumSquares = 0;
-  for (let i = 0; i < pcmData.length; i++) {
-    let sample = pcmData[i];
-    sumSquares += sample * sample;
-  }
-  return Math.sqrt(sumSquares / pcmData.length);
-}
-
-function calculatedb(rms, reference = 32768.0) {
-  return 20 * Math.log10(Math.max(rms, 1e-12) / reference);
-}
+const CALIB_TARGET_SPL = LIMITS.CALIB_TARGET_SPL; // 固定的 1kHz 纯音参考标准
+let advancedRecorderListenersBound = false;
+let activeAdvancedCalibratePage = null;
 
 function recordArray(currentTime, dBSPL) {
   dBArray[currentTime] = dBSPL;
@@ -70,6 +56,7 @@ Page({
   
   onShow() {
     this.isPageActive = true;
+    activeAdvancedCalibratePage = this;
     this.initMonitor();
     this.setupRecorderListeners(); // 新增：统一挂载录音监听器
     this.noiseDetect();
@@ -77,17 +64,23 @@ Page({
 
   onHide() { 
     this.isPageActive = false;
+    if (activeAdvancedCalibratePage === this) {
+      activeAdvancedCalibratePage = null;
+    }
     this.stopNoiseMonitoring(); 
   },
   
   onUnload() { 
     this.isPageActive = false;
+    if (activeAdvancedCalibratePage === this) {
+      activeAdvancedCalibratePage = null;
+    }
     this.stopNoiseMonitoring(); 
   },
 
   initMonitor() {
     try {
-      offset = wx.getStorageSync('offset') || 0;
+      offset = dataModel.getOffset();
       audioCtx = wx.createWebAudioContext();
       dBArray = [0];
       time = 0;
@@ -99,35 +92,49 @@ Page({
 
   // 新增的专门处理录音机生命周期的函数
   setupRecorderListeners() {
+    if (advancedRecorderListenersBound) {
+      return;
+    }
+
     // 1. 监听意外停止
     recorderManager.onStop((res) => {
+      const page = activeAdvancedCalibratePage;
+      if (!page) {
+        return;
+      }
       console.log('[Recorder] Stopped', res);
       // 核心修复：如果页面还在前台，说明是被系统弹窗打断的，自动重启！
-      if (this.isPageActive) {
+      if (page.isPageActive) {
         console.log('[Recorder] 尝试自动恢复录音...');
         setTimeout(() => {
-          recorderManager.start(this.recordParams);
+          recorderManager.start(page.recordParams);
         }, 500); 
       }
     });
 
     // 2. 监听系统级打断恢复 (如接完电话切回)
     recorderManager.onInterruptionEnd(() => {
-      if (this.isPageActive) {
-        recorderManager.start(this.recordParams);
+      const page = activeAdvancedCalibratePage;
+      if (page && page.isPageActive) {
+        recorderManager.start(page.recordParams);
       }
     });
 
     // 3. 原本的帧回调逻辑 (直接把原来的代码搬过来)
     recorderManager.onFrameRecorded(res => { 
+      const page = activeAdvancedCalibratePage;
+      if (!page) {
+        return;
+      }
+
       const buffer = new Int16Array(res.frameBuffer);
       
       // -- 常规瞬间计算 --
       const energy = calculateRMS(buffer);
-      const dbfs = calculatedb(energy);
+      const dbfs = calculateDb(energy);
       const dbspl = dbfs + offset;
 
-      if (!this.data.isCalibratingUI) {
+      if (!page.data.isCalibratingUI) {
         frameCount++;
         if (frameCount % 2 === 0) {
           time++;
@@ -144,11 +151,13 @@ Page({
         calibSamples += buffer.length;
       }
 
-      this.setData({
+      page.setData({
         dbfs: dbfs.toFixed(2),
         dbspl: dbspl.toFixed(2),
       }); 
     });
+
+    advancedRecorderListenersBound = true;
   },
 
   stopNoiseMonitoring() {
@@ -213,7 +222,7 @@ Page({
     // 计算5秒平均能量 -> 求RMS -> 转对数dBFS
     const meanSquare = calibEnergySum / calibSamples;
     const rms = Math.sqrt(meanSquare);
-    const leqDbfs = calculatedb(rms, 1.0); 
+    const leqDbfs = calculateDb(rms, 1.0);
     
     // 偏移量 = 真实基准声压(80) - 测得数字分贝
     const calibrationOffset = CALIB_TARGET_SPL - leqDbfs;
@@ -238,7 +247,7 @@ Page({
       content: `1kHz基准计算偏移量为：${offsetVal} dB\n是否立即覆盖当前设备配置？`,
       success(res) {
         if (res.confirm) {
-          wx.setStorageSync('offset', offsetVal);
+          dataModel.setOffset(offsetVal);
           offset = offsetVal; 
           wx.showToast({ title: '校准已生效', icon: 'success' });
         }

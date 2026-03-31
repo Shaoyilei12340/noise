@@ -29,7 +29,7 @@
 
       <view class="cell">
         <text class="cell__label">累计能量阈值</text>
-        <slider class="slider" min="30" max="150" step="5" value="{{energy}}" bindchange="changeEnergy" activeColor="#4facfe"/>
+        <slider class="slider" min="30" max="150" step="5" value="{{energy}}" bindchange="changeEnergy" activeColor="#A41F35"/>
         <text class="slider__value">{{energy}}</text>
       </view>
 
@@ -46,7 +46,7 @@
       <view class="group__title">提醒与权限</view>
       <view class="cell">
         <text class="cell__label">超标提醒</text>
-        <switch checked="{{alarm}}" bindchange="toggleAlarm" color="#4facfe"/>
+        <switch checked="{{alarm}}" bindchange="toggleAlarm" color="#A41F35"/>
       </view>
       <view class="btn btn--plain" bindtap="requestRecord">麦克风权限管理</view>
     </view>
@@ -56,7 +56,7 @@
       
       <view class="cell">
         <text class="cell__label">偏移量</text>
-        <slider class="slider" min="0" max="150" step="1" value="{{offset}}" bindchange="changeOffset" activeColor="#4facfe"/>
+        <slider class="slider" min="-200" max="200" step="1" value="{{offset}}" bindchange="changeOffset" activeColor="#A41F35"/>
         <text class="slider__value">{{offset}}</text>
       </view>
       <view class="group__subtitle">（慎重调整，直接影响测量结果）</view>
@@ -66,16 +66,16 @@
     <view class="group">
       <view class="group__title">外观与缓存</view>
       <view class="cell">
-        <text class="cell__label">深色模式</text>
-        <switch checked="{{darkMode}}" bindchange="toggleDark" color="#4facfe"/>
+        <text class="cell__label">深色模式（未适配）</text>
+        <switch checked="{{darkMode}}" bindchange="toggleDark" color="#A41F35"/>
       </view>
-      <view class="btn btn--plain" bindtap="clearCache">清除本地缓存</view>
     </view>
 
 
     <!-- 底部操作 -->
     <view class="footer">
       <button class="btn btn--primary" bindtap="save">保存</button>
+      <button class="btn btn--ghost" bindtap="clearCache">清除缓存</button>
       <button class="btn btn--ghost" bindtap="reset">恢复默认</button>
     </view>
   </scroll-view>

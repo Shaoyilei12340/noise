@@ -1,25 +1,52 @@
 <!--pages/knowledge/knowledge.wxml-->
-<view class="page">
-  <view class="head">
+ <view class="page-container">
+  <!-- 页面头部 -->
+  <view class="doc-header">
     <text class="title">噪声危害科普</text>
-    <text class="sub">了解噪声，保护自己</text>
+    <text class="subtitle">POPULAR SCIENCE</text>
   </view>
 
-  <view class="section">
-    <image class="pic" src="/images/what.png" mode="aspectFill" />
-    <text class="h2">什么是噪声？</text>
-    <text class="p">凡是令人烦躁、不适或妨碍正常生活的声音，都可称为噪声。法律评价指标为 dB(A)。</text>
+  <!-- 内容卡片 -->
+  <view class="doc-card">
+    <image class="cover-pic" src="/images/harm.svg" mode="aspectFill" />
+    <view class="article">
+      <text class="h2">什么是噪声</text>
+      <text class="p">妨碍人们正常休息、学习和工作的声音，以及对人们要听的声音产生干扰的声音，都属于噪声。当声音超过85分贝时，就会开始对人体产生显著危害。法律评价指标为 dB(A)，即A计权。</text>
+    </view>
   </view>
+  <view class="doc-card">
+    <image class="cover-pic" src="/images/protect.svg" mode="aspectFill" />
+    <view class="article">
+      <text class="h2">护耳小贴士</text>
+      <text class="p">60-60原则：使用耳机时，音量不超过最大音量的60%，连续使用不超过60分钟
+    	物理防护：在工地、演唱会等高噪环境下，佩戴防噪耳塞或降噪耳机
+    	定期检测：如果发现耳鸣、听不清高频声音（如门铃、电话铃），应及时就医
+      </text>
+    </view>
+  </view>
+  <view class="doc-card">
+    <image class="cover-pic" src="/images/eardmg.svg" mode="aspectFill" />
+    <view class="article">
+      <text class="h2">噪声的“三重打击”</text>
+      <text class="p">听力损伤（不可逆）：可能导致永久性内耳毛细胞受损，目前医学上无法治愈
 
-  <view class="section">
-    <image class="pic" src="/images/harm.png" mode="aspectFill" />
-    <text class="h2">对健康的伤害\n</text>
-    <text class="p">• 听力：长期 ≥85 dB(A) → 永久听力下降\n• 心血管：夜间 ≥55 dB(A) → 高血压风险上升\n• 神经系统 & 情绪：记忆力下降，精力难以集中，易怒暴躁</text>
-  </view>
+      心血管系统：噪声易导致血压升高、心率加快，长期暴露会增加高血压、心脏病的风险
 
-  <view class="section">
-    <image class="pic" src="/images/protect.png" mode="aspectFill" />
-    <text class="h2">如何防护？</text>
-    <text class="p">1. 远离或降低声源\n2. 佩戴降噪耳塞/耳罩\n3. 合理作息，减少暴露时间\n4. 定期检测听力</text>
+      心理与认知：影响睡眠质量，导致失眠多梦；降低专注力、记忆力，引发焦虑和易怒情绪
+      </text>
+    </view>
   </view>
+  <view class="doc-card">
+    <image class="cover-pic" src="/images/dblevel.svg" mode="aspectFill" />
+    <view class="article">
+      <text class="h2">简易分贝等级对照表</text>
+      <text class="p">0-20dB ：极静（落叶声）舒适
+      30-50dB ：安静（图书馆、私语）理想睡眠环境
+      60-70dB ：嘈杂（正常交谈、空调外机）开始影响注意力
+      80-90dB ：吵闹（吸尘器、闹市交通）听力开始受损
+      100dB以上 ：危害（电钻、KTV、飞机起飞）长时间暴露导致永久性耳聋
+      </text>
+    </view>
+  </view>
+  
 </view>

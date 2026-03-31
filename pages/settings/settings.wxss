@@ -1,153 +1,168 @@
-/*.container {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-.setting-item {
-  width: 100%;
-  margin-bottom: 20px;
-}
-.setting-item text {
-  display: block;
-  margin-bottom: 10px;
-}*/
-
-.page {
-  background-color: #f5f7fa;
+page {
+  background-color: #F4F5F7;
   min-height: 100vh;
+  font-family: -apple-system, sans-serif;
 }
 
+/* 去掉蓝色的渐变导航背景，改为原生大标题风格 */
 .nav {
-  background: linear-gradient(to right, #4facfe, #00f2fe);
-  padding: 40rpx 30rpx 20rpx;
-  color: white;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+  padding: 60rpx 32rpx 20rpx;
+  background: transparent;
+  box-shadow: none;
 }
 .nav__title {
-  font-size: 36rpx;
-  font-weight: bold;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: 2rpx;
 }
 
 .content {
-  padding: 20rpx 24rpx;
-  box-sizing: border-box;
+  padding: 0 0 60rpx 0;
 }
 
+/* 列表容器 */
 .group {
-  width: 100%;
-  background-color: #ffffff;
-  border-radius: 20rpx;
-  margin-bottom: 40rpx;
-  padding: 20rpx;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04);
-  box-sizing: border-box;
+  margin: 20rpx 32rpx 50rpx;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
 }
 
+/* 分组标题 */
 .group__title {
-  font-size: 28rpx;
-  font-weight: bold;
-  padding: 20rpx 30rpx 10rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #888888;
+  padding: 0 0 16rpx 16rpx;
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
 }
 .group__subtitle {
-  font-size: 28rpx;
-  font-weight:lighter;
-  padding: 20rpx 30rpx 10rpx;
+  font-size: 24rpx;
+  color: #AAAAAA;
+  padding: 16rpx 0 0 16rpx;
 }
 
+/* 为了实现 iOS 那种全包裹的白色卡片，这里假设你在 wxml 里给 cell 外面套了一个包裹层。
+   如果没有套，直接作用在组上也可以，这里用直接相邻选择器给 Cell 加白底 */
 .cell {
+  background-color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx 24rpx;
-  border-top: 1rpx solid #f0f0f0;
+  padding: 32rpx 36rpx;
+  border-bottom: 1rpx solid #F0F0F0;
 }
-.cell:first-child {
-  border-top: none;
+
+/* 第一项顶部圆角，最后一项底部圆角，实现卡片包裹效果 */
+.cell:first-of-type {
+  border-top-left-radius: 24rpx;
+  border-top-right-radius: 24rpx;
+}
+.cell:last-of-type {
+  border-bottom-left-radius: 24rpx;
+  border-bottom-right-radius: 24rpx;
+  border-bottom: none;
 }
 
 .cell__label {
-  font-size: 28rpx;
-  color: #555;
-  flex-shrink: 0;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333333;
 }
 .cell__right {
   display: flex;
   align-items: center;
-  gap: 20rpx;
 }
 
+/* 步进器美化：更现代的无边框圆角按钮 */
 .stepper__btn {
-  width: 48rpx;
-  height: 48rpx;
-  background: #e0e0e0;
-  font-size: 28rpx;
-  border-radius: 50%;  /* 圆形按钮 */
+  width: 64rpx;
+  height: 64rpx;
+  background: #F4F5F7;
+  border-radius: 50%;
+  font-size: 36rpx;
+  font-weight: bold;
   text-align: center;
-  line-height: 48rpx;
-  color: #333;
-  border: 1rpx solid #ccc;
+  line-height: 60rpx;
+  color: #A41F35; /* 华师大红强调色 */
+  border: none;
+  transition: all 0.2s;
+}
+.stepper__btn:active {
+  background: #EAEAEA;
 }
 .stepper__btn--disabled {
-  background: #f0f0f0;
-  color: #aaa;
-  border: 1rpx solid #ddd;
+  background: #F9F9F9;
+  color: #CCCCCC;
 }
 
 .stepper__value {
-  width: 100rpx;
+  width: 110rpx;
   text-align: center;
-  font-size: 28rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #111;
+  font-variant-numeric: tabular-nums;
 }
 
 .slider {
-  width: 300rpx;
+  flex: 1;
+  margin: 0 30rpx;
 }
 .slider__value {
-  font-size: 26rpx;
-  color: #999;
-  margin-left: 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #A41F35;
+  min-width: 60rpx;
+  text-align: right;
 }
 
 .picker {
-  padding: 12rpx 20rpx;
-  border: 1rpx solid #ccc;
-  border-radius: 8rpx;
+  padding: 12rpx 24rpx;
+  background: #F4F5F7;
+  color: #333;
+  border-radius: 12rpx;
   font-size: 28rpx;
+  font-weight: 600;
+}
+
+/* 按钮区美化：高级悬浮质感 */
+.footer {
+  padding: 20rpx 40rpx;
+  display: flex;
+  flex-direction: column; /* 竖向排列更符合移动端习惯 */
+  gap: 30rpx;
 }
 
 .btn {
-  margin: 20rpx 30rpx;
-  padding: 20rpx;
-  font-size: 30rpx;
-  border-radius: 16rpx;
+  width: 100% !important; /* 强制填满容器 */
+  padding: 26rpx 0;
+  font-size: 34rpx;
+  font-weight: bold;
+  border-radius: 100rpx; /* 大胶囊按钮 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .btn--primary {
-  background: linear-gradient(to right, #4facfe, #00f2fe);
-  color: white;
+  background: #A41F35; /* 华师大红 */
+  color: #FFFFFF;
+  box-shadow: 0 10rpx 20rpx rgba(164, 31, 53, 0.25); /* 红色按钮的同色系弥散发光 */
 }
+
 .btn--ghost {
   background: transparent;
-  color: #4facfe;
-  border: 2rpx solid #4facfe;
+  color: #A41F35;
+  border: 2rpx solid #A41F35;
 }
+
 .btn--plain {
-  background: #f5f5f5;
-  color: #333;
+  /* “清除本地缓存”等次要操作按钮 */
+  background: transparent;
+  color: #888888;
+  font-size: 28rpx;
+  padding: 20rpx 0;
 }
-
-.footer {
-  display: flex;
-  gap: 20rpx;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-
-
-
